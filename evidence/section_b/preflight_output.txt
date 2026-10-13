@@ -1,0 +1,1495 @@
+SQL>
+SQL> PROMPT ===== CURRENT USER =====
+===== CURRENT USER =====
+SQL> SELECT USER AS current_user
+  2  FROM dual;
+
+CURRENT_USER
+--------------------------------------------------------------------------------------------------------------------------------
+GWC5419
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== ORACLE VERSION =====
+===== ORACLE VERSION =====
+SQL> SELECT banner
+  2  FROM v$version
+  3  WHERE banner LIKE 'Oracle Database%';
+
+BANNER
+--------------------------------------------------------------------------------
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== READ ACCESS TO SH.SALES =====
+===== READ ACCESS TO SH.SALES =====
+SQL> SELECT COUNT(*) AS sh_sales_row_count
+  2  FROM sh.sales;
+
+SH_SALES_ROW_COUNT
+------------------
+            918843
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== REQUIRED SH OBJECTS VISIBLE TO CURRENT USER =====
+===== REQUIRED SH OBJECTS VISIBLE TO CURRENT USER =====
+SQL> SELECT owner,
+  2         object_name,
+  3         object_type,
+  4         status
+  5  FROM all_objects
+  6  WHERE owner = 'SH'
+  7    AND object_name IN (
+  8        'SALES',
+  9        'PRODUCTS',
+ 10        'CUSTOMERS',
+ 11        'COUNTRIES',
+ 12        'TIMES',
+ 13        'CHANNELS',
+ 14        'PROMOTIONS'
+ 15    )
+ 16    AND object_type IN ('TABLE', 'VIEW')
+ 17  ORDER BY object_name,
+ 18           object_type;
+
+OWNER                                                                                                                            OBJECT_NAME
+-------------------------------------------------------------------------------------------------------------------------------- --------------------------------------------------------------------------------------------------------------------------------
+OBJECT_TYPE             STATUS
+----------------------- -------
+SH                                                                                                                               CHANNELS
+TABLE                   VALID
+
+SH                                                                                                                               COUNTRIES
+TABLE                   VALID
+
+SH                                                                                                                               CUSTOMERS
+TABLE                   VALID
+
+SH                                                                                                                               PRODUCTS
+TABLE                   VALID
+
+SH                                                                                                                               PROMOTIONS
+TABLE                   VALID
+
+SH                                                                                                                               SALES
+TABLE                   VALID
+
+SH                                                                                                                               TIMES
+TABLE                   VALID
+
+
+7 rows selected.
+
+SQL>
+SQL> PROMPT ===== REQUIRED SH COLUMN NAMES AND DATATYPES =====
+===== REQUIRED SH COLUMN NAMES AND DATATYPES =====
+SQL> SELECT table_name,
+  2         column_id,
+  3         column_name,
+  4         data_type,
+  5         data_length,
+  6         data_precision,
+  7         data_scale,
+  8         nullable
+  9  FROM all_tab_columns
+ 10  WHERE owner = 'SH'
+ 11    AND table_name IN (
+ 12        'SALES',
+ 13        'PRODUCTS',
+ 14        'CUSTOMERS',
+ 15        'COUNTRIES',
+ 16        'TIMES',
+ 17        'CHANNELS',
+ 18        'PROMOTIONS'
+ 19    )
+ 20  ORDER BY table_name,
+ 21           column_id;
+
+TABLE_NAME                                                                                                                        COLUMN_ID
+-------------------------------------------------------------------------------------------------------------------------------- ----------
+COLUMN_NAME                                                                                                                      DATA_TYPE
+-------------------------------------------------------------------------------------------------------------------------------- --------------------------------------------------------------------------------------------------------------------------------
+DATA_LENGTH DATA_PRECISION DATA_SCALE N
+----------- -------------- ---------- -
+CHANNELS                                                                                                                                  1
+CHANNEL_ID                                                                                                                       NUMBER
+         22                           N
+
+CHANNELS                                                                                                                                  2
+CHANNEL_DESC                                                                                                                     VARCHAR2
+         20                           N
+
+CHANNELS                                                                                                                                  3
+CHANNEL_CLASS                                                                                                                    VARCHAR2
+         20                           N
+
+CHANNELS                                                                                                                                  4
+CHANNEL_CLASS_ID                                                                                                                 NUMBER
+         22                           N
+
+CHANNELS                                                                                                                                  5
+CHANNEL_TOTAL                                                                                                                    VARCHAR2
+         13                           N
+
+CHANNELS                                                                                                                                  6
+CHANNEL_TOTAL_ID                                                                                                                 NUMBER
+         22                           N
+
+COUNTRIES                                                                                                                                 1
+COUNTRY_ID                                                                                                                       NUMBER
+         22                           N
+
+COUNTRIES                                                                                                                                 2
+COUNTRY_ISO_CODE                                                                                                                 CHAR
+          2                           N
+
+COUNTRIES                                                                                                                                 3
+COUNTRY_NAME                                                                                                                     VARCHAR2
+         40                           N
+
+COUNTRIES                                                                                                                                 4
+COUNTRY_SUBREGION                                                                                                                VARCHAR2
+         30                           N
+
+COUNTRIES                                                                                                                                 5
+COUNTRY_SUBREGION_ID                                                                                                             NUMBER
+         22                           N
+
+COUNTRIES                                                                                                                                 6
+COUNTRY_REGION                                                                                                                   VARCHAR2
+         20                           N
+
+COUNTRIES                                                                                                                                 7
+COUNTRY_REGION_ID                                                                                                                NUMBER
+         22                           N
+
+COUNTRIES                                                                                                                                 8
+COUNTRY_TOTAL                                                                                                                    VARCHAR2
+         11                           N
+
+COUNTRIES                                                                                                                                 9
+COUNTRY_TOTAL_ID                                                                                                                 NUMBER
+         22                           N
+
+COUNTRIES                                                                                                                                10
+COUNTRY_NAME_HIST                                                                                                                VARCHAR2
+         40                           Y
+
+CUSTOMERS                                                                                                                                 1
+CUST_ID                                                                                                                          NUMBER
+         22                           N
+
+CUSTOMERS                                                                                                                                 2
+CUST_FIRST_NAME                                                                                                                  VARCHAR2
+         20                           N
+
+CUSTOMERS                                                                                                                                 3
+CUST_LAST_NAME                                                                                                                   VARCHAR2
+         40                           N
+
+CUSTOMERS                                                                                                                                 4
+CUST_GENDER                                                                                                                      CHAR
+          1                           N
+
+CUSTOMERS                                                                                                                                 5
+CUST_YEAR_OF_BIRTH                                                                                                               NUMBER
+         22              4          0 N
+
+CUSTOMERS                                                                                                                                 6
+CUST_MARITAL_STATUS                                                                                                              VARCHAR2
+         20                           Y
+
+CUSTOMERS                                                                                                                                 7
+CUST_STREET_ADDRESS                                                                                                              VARCHAR2
+         40                           N
+
+CUSTOMERS                                                                                                                                 8
+CUST_POSTAL_CODE                                                                                                                 VARCHAR2
+         10                           N
+
+CUSTOMERS                                                                                                                                 9
+CUST_CITY                                                                                                                        VARCHAR2
+         30                           N
+
+CUSTOMERS                                                                                                                                10
+CUST_CITY_ID                                                                                                                     NUMBER
+         22                           N
+
+CUSTOMERS                                                                                                                                11
+CUST_STATE_PROVINCE                                                                                                              VARCHAR2
+         40                           N
+
+CUSTOMERS                                                                                                                                12
+CUST_STATE_PROVINCE_ID                                                                                                           NUMBER
+         22                           N
+
+CUSTOMERS                                                                                                                                13
+COUNTRY_ID                                                                                                                       NUMBER
+         22                           N
+
+CUSTOMERS                                                                                                                                14
+CUST_MAIN_PHONE_NUMBER                                                                                                           VARCHAR2
+         25                           N
+
+CUSTOMERS                                                                                                                                15
+CUST_INCOME_LEVEL                                                                                                                VARCHAR2
+         30                           Y
+
+CUSTOMERS                                                                                                                                16
+CUST_CREDIT_LIMIT                                                                                                                NUMBER
+         22                           Y
+
+CUSTOMERS                                                                                                                                17
+CUST_EMAIL                                                                                                                       VARCHAR2
+         50                           Y
+
+CUSTOMERS                                                                                                                                18
+CUST_TOTAL                                                                                                                       VARCHAR2
+         14                           N
+
+CUSTOMERS                                                                                                                                19
+CUST_TOTAL_ID                                                                                                                    NUMBER
+         22                           N
+
+CUSTOMERS                                                                                                                                20
+CUST_SRC_ID                                                                                                                      NUMBER
+         22                           Y
+
+CUSTOMERS                                                                                                                                21
+CUST_EFF_FROM                                                                                                                    DATE
+          7                           Y
+
+CUSTOMERS                                                                                                                                22
+CUST_EFF_TO                                                                                                                      DATE
+          7                           Y
+
+CUSTOMERS                                                                                                                                23
+CUST_VALID                                                                                                                       VARCHAR2
+          1                           Y
+
+PRODUCTS                                                                                                                                  1
+PROD_ID                                                                                                                          NUMBER
+         22              6          0 N
+
+PRODUCTS                                                                                                                                  2
+PROD_NAME                                                                                                                        VARCHAR2
+         50                           N
+
+PRODUCTS                                                                                                                                  3
+PROD_DESC                                                                                                                        VARCHAR2
+       4000                           N
+
+PRODUCTS                                                                                                                                  4
+PROD_SUBCATEGORY                                                                                                                 VARCHAR2
+         50                           N
+
+PRODUCTS                                                                                                                                  5
+PROD_SUBCATEGORY_ID                                                                                                              NUMBER
+         22                           N
+
+PRODUCTS                                                                                                                                  6
+PROD_SUBCATEGORY_DESC                                                                                                            VARCHAR2
+       2000                           N
+
+PRODUCTS                                                                                                                                  7
+PROD_CATEGORY                                                                                                                    VARCHAR2
+         50                           N
+
+PRODUCTS                                                                                                                                  8
+PROD_CATEGORY_ID                                                                                                                 NUMBER
+         22                           N
+
+PRODUCTS                                                                                                                                  9
+PROD_CATEGORY_DESC                                                                                                               VARCHAR2
+       2000                           N
+
+PRODUCTS                                                                                                                                 10
+PROD_WEIGHT_CLASS                                                                                                                NUMBER
+         22              3          0 N
+
+PRODUCTS                                                                                                                                 11
+PROD_UNIT_OF_MEASURE                                                                                                             VARCHAR2
+         20                           Y
+
+PRODUCTS                                                                                                                                 12
+PROD_PACK_SIZE                                                                                                                   VARCHAR2
+         30                           N
+
+PRODUCTS                                                                                                                                 13
+SUPPLIER_ID                                                                                                                      NUMBER
+         22              6          0 N
+
+PRODUCTS                                                                                                                                 14
+PROD_STATUS                                                                                                                      VARCHAR2
+         20                           N
+
+PRODUCTS                                                                                                                                 15
+PROD_LIST_PRICE                                                                                                                  NUMBER
+         22              8          2 N
+
+PRODUCTS                                                                                                                                 16
+PROD_MIN_PRICE                                                                                                                   NUMBER
+         22              8          2 N
+
+PRODUCTS                                                                                                                                 17
+PROD_TOTAL                                                                                                                       VARCHAR2
+         13                           N
+
+PRODUCTS                                                                                                                                 18
+PROD_TOTAL_ID                                                                                                                    NUMBER
+         22                           N
+
+PRODUCTS                                                                                                                                 19
+PROD_SRC_ID                                                                                                                      NUMBER
+         22                           Y
+
+PRODUCTS                                                                                                                                 20
+PROD_EFF_FROM                                                                                                                    DATE
+          7                           Y
+
+PRODUCTS                                                                                                                                 21
+PROD_EFF_TO                                                                                                                      DATE
+          7                           Y
+
+PRODUCTS                                                                                                                                 22
+PROD_VALID                                                                                                                       VARCHAR2
+          1                           Y
+
+PROMOTIONS                                                                                                                                1
+PROMO_ID                                                                                                                         NUMBER
+         22              6          0 N
+
+PROMOTIONS                                                                                                                                2
+PROMO_NAME                                                                                                                       VARCHAR2
+         30                           N
+
+PROMOTIONS                                                                                                                                3
+PROMO_SUBCATEGORY                                                                                                                VARCHAR2
+         30                           N
+
+PROMOTIONS                                                                                                                                4
+PROMO_SUBCATEGORY_ID                                                                                                             NUMBER
+         22                           N
+
+PROMOTIONS                                                                                                                                5
+PROMO_CATEGORY                                                                                                                   VARCHAR2
+         30                           N
+
+PROMOTIONS                                                                                                                                6
+PROMO_CATEGORY_ID                                                                                                                NUMBER
+         22                           N
+
+PROMOTIONS                                                                                                                                7
+PROMO_COST                                                                                                                       NUMBER
+         22             10          2 N
+
+PROMOTIONS                                                                                                                                8
+PROMO_BEGIN_DATE                                                                                                                 DATE
+          7                           N
+
+PROMOTIONS                                                                                                                                9
+PROMO_END_DATE                                                                                                                   DATE
+          7                           N
+
+PROMOTIONS                                                                                                                               10
+PROMO_TOTAL                                                                                                                      VARCHAR2
+         15                           N
+
+PROMOTIONS                                                                                                                               11
+PROMO_TOTAL_ID                                                                                                                   NUMBER
+         22                           N
+
+SALES                                                                                                                                     1
+PROD_ID                                                                                                                          NUMBER
+         22                           N
+
+SALES                                                                                                                                     2
+CUST_ID                                                                                                                          NUMBER
+         22                           N
+
+SALES                                                                                                                                     3
+TIME_ID                                                                                                                          DATE
+          7                           N
+
+SALES                                                                                                                                     4
+CHANNEL_ID                                                                                                                       NUMBER
+         22                           N
+
+SALES                                                                                                                                     5
+PROMO_ID                                                                                                                         NUMBER
+         22                           N
+
+SALES                                                                                                                                     6
+QUANTITY_SOLD                                                                                                                    NUMBER
+         22             10          2 N
+
+SALES                                                                                                                                     7
+AMOUNT_SOLD                                                                                                                      NUMBER
+         22             10          2 N
+
+TIMES                                                                                                                                     1
+TIME_ID                                                                                                                          DATE
+          7                           N
+
+TIMES                                                                                                                                     2
+DAY_NAME                                                                                                                         VARCHAR2
+          9                           N
+
+TIMES                                                                                                                                     3
+DAY_NUMBER_IN_WEEK                                                                                                               NUMBER
+         22              1          0 N
+
+TIMES                                                                                                                                     4
+DAY_NUMBER_IN_MONTH                                                                                                              NUMBER
+         22              2          0 N
+
+TIMES                                                                                                                                     5
+CALENDAR_WEEK_NUMBER                                                                                                             NUMBER
+         22              2          0 N
+
+TIMES                                                                                                                                     6
+FISCAL_WEEK_NUMBER                                                                                                               NUMBER
+         22              2          0 N
+
+TIMES                                                                                                                                     7
+WEEK_ENDING_DAY                                                                                                                  DATE
+          7                           N
+
+TIMES                                                                                                                                     8
+WEEK_ENDING_DAY_ID                                                                                                               NUMBER
+         22                           N
+
+TIMES                                                                                                                                     9
+CALENDAR_MONTH_NUMBER                                                                                                            NUMBER
+         22              2          0 N
+
+TIMES                                                                                                                                    10
+FISCAL_MONTH_NUMBER                                                                                                              NUMBER
+         22              2          0 N
+
+TIMES                                                                                                                                    11
+CALENDAR_MONTH_DESC                                                                                                              VARCHAR2
+          8                           N
+
+TIMES                                                                                                                                    12
+CALENDAR_MONTH_ID                                                                                                                NUMBER
+         22                           N
+
+TIMES                                                                                                                                    13
+FISCAL_MONTH_DESC                                                                                                                VARCHAR2
+          8                           N
+
+TIMES                                                                                                                                    14
+FISCAL_MONTH_ID                                                                                                                  NUMBER
+         22                           N
+
+TIMES                                                                                                                                    15
+DAYS_IN_CAL_MONTH                                                                                                                NUMBER
+         22                           N
+
+TIMES                                                                                                                                    16
+DAYS_IN_FIS_MONTH                                                                                                                NUMBER
+         22                           N
+
+TIMES                                                                                                                                    17
+END_OF_CAL_MONTH                                                                                                                 DATE
+          7                           N
+
+TIMES                                                                                                                                    18
+END_OF_FIS_MONTH                                                                                                                 DATE
+          7                           N
+
+TIMES                                                                                                                                    19
+CALENDAR_MONTH_NAME                                                                                                              VARCHAR2
+          9                           N
+
+TIMES                                                                                                                                    20
+FISCAL_MONTH_NAME                                                                                                                VARCHAR2
+          9                           N
+
+TIMES                                                                                                                                    21
+CALENDAR_QUARTER_DESC                                                                                                            CHAR
+          7                           N
+
+TIMES                                                                                                                                    22
+CALENDAR_QUARTER_ID                                                                                                              NUMBER
+         22                           N
+
+TIMES                                                                                                                                    23
+FISCAL_QUARTER_DESC                                                                                                              CHAR
+          7                           N
+
+TIMES                                                                                                                                    24
+FISCAL_QUARTER_ID                                                                                                                NUMBER
+         22                           N
+
+TIMES                                                                                                                                    25
+DAYS_IN_CAL_QUARTER                                                                                                              NUMBER
+         22                           N
+
+TIMES                                                                                                                                    26
+DAYS_IN_FIS_QUARTER                                                                                                              NUMBER
+         22                           N
+
+TIMES                                                                                                                                    27
+END_OF_CAL_QUARTER                                                                                                               DATE
+          7                           N
+
+TIMES                                                                                                                                    28
+END_OF_FIS_QUARTER                                                                                                               DATE
+          7                           N
+
+TIMES                                                                                                                                    29
+CALENDAR_QUARTER_NUMBER                                                                                                          NUMBER
+         22              1          0 N
+
+TIMES                                                                                                                                    30
+FISCAL_QUARTER_NUMBER                                                                                                            NUMBER
+         22              1          0 N
+
+TIMES                                                                                                                                    31
+CALENDAR_YEAR                                                                                                                    NUMBER
+         22              4          0 N
+
+TIMES                                                                                                                                    32
+CALENDAR_YEAR_ID                                                                                                                 NUMBER
+         22                           N
+
+TIMES                                                                                                                                    33
+FISCAL_YEAR                                                                                                                      NUMBER
+         22              4          0 N
+
+TIMES                                                                                                                                    34
+FISCAL_YEAR_ID                                                                                                                   NUMBER
+         22                           N
+
+TIMES                                                                                                                                    35
+DAYS_IN_CAL_YEAR                                                                                                                 NUMBER
+         22                           N
+
+TIMES                                                                                                                                    36
+DAYS_IN_FIS_YEAR                                                                                                                 NUMBER
+         22                           N
+
+TIMES                                                                                                                                    37
+END_OF_CAL_YEAR                                                                                                                  DATE
+          7                           N
+
+TIMES                                                                                                                                    38
+END_OF_FIS_YEAR                                                                                                                  DATE
+          7                           N
+
+
+117 rows selected.
+
+SQL>
+SQL> PROMPT ===== CURRENT-SCHEMA OBJECT CONFLICT CHECK =====
+===== CURRENT-SCHEMA OBJECT CONFLICT CHECK =====
+SQL> SELECT object_type,
+  2         object_name,
+  3         status
+  4  FROM user_objects
+  5  WHERE object_name = 'PROMOTION_ANALYSIS_MV'
+  6  ORDER BY object_type;
+
+0 rows selected.
+
+SQL>
+SQL> PROMPT ===== CURRENT-SCHEMA MATERIALIZED VIEW CHECK =====
+===== CURRENT-SCHEMA MATERIALIZED VIEW CHECK =====
+SQL> SELECT mview_name,
+  2         build_mode,
+  3         refresh_mode,
+  4         refresh_method,
+  5         staleness,
+  6         compile_state
+  7  FROM user_mviews
+  8  WHERE mview_name = 'PROMOTION_ANALYSIS_MV';
+
+0 rows selected.
+
+SQL>
+SQL> PROMPT ===== EFFECTIVE MATERIALIZED-VIEW PRIVILEGES =====
+===== EFFECTIVE MATERIALIZED-VIEW PRIVILEGES =====
+SQL> SELECT privilege
+  2  FROM session_privs
+  3  WHERE privilege IN (
+  4      'CREATE MATERIALIZED VIEW',
+  5      'CREATE TABLE',
+  6      'QUERY REWRITE',
+  7      'GLOBAL QUERY REWRITE',
+  8      'UNLIMITED TABLESPACE'
+  9  )
+ 10  ORDER BY privilege;
+
+PRIVILEGE
+----------------------------------------
+CREATE MATERIALIZED VIEW
+CREATE TABLE
+UNLIMITED TABLESPACE
+
+3 rows selected.
+
+SQL>
+SQL> PROMPT ===== DIRECT MATERIALIZED-VIEW PRIVILEGES =====
+===== DIRECT MATERIALIZED-VIEW PRIVILEGES =====
+SQL> SELECT privilege,
+  2         admin_option
+  3  FROM user_sys_privs
+  4  WHERE privilege IN (
+  5      'CREATE MATERIALIZED VIEW',
+  6      'CREATE TABLE',
+  7      'QUERY REWRITE',
+  8      'GLOBAL QUERY REWRITE',
+  9      'UNLIMITED TABLESPACE'
+ 10  )
+ 11  ORDER BY privilege;
+
+PRIVILEGE                                ADM
+---------------------------------------- ---
+CREATE MATERIALIZED VIEW                 NO
+CREATE TABLE                             NO
+UNLIMITED TABLESPACE                     NO
+
+3 rows selected.
+
+SQL>
+SQL> PROMPT ===== DIRECT OR PUBLIC SELECT GRANTS ON REQUIRED SH OBJECTS =====
+===== DIRECT OR PUBLIC SELECT GRANTS ON REQUIRED SH OBJECTS =====
+SQL> SELECT grantee,
+  2         owner,
+  3         table_name,
+  4         privilege,
+  5         grantable
+  6  FROM all_tab_privs
+  7  WHERE owner = 'SH'
+  8    AND table_name IN (
+  9        'SALES',
+ 10        'PRODUCTS',
+ 11        'CUSTOMERS',
+ 12        'COUNTRIES',
+ 13        'TIMES',
+ 14        'CHANNELS',
+ 15        'PROMOTIONS'
+ 16    )
+ 17    AND grantee IN (USER, 'PUBLIC')
+ 18    AND privilege = 'SELECT'
+ 19  ORDER BY table_name,
+ 20           grantee;
+
+Error starting at line : 116 in command -
+SELECT grantee,
+       owner,
+       table_name,
+       privilege,
+       grantable
+FROM all_tab_privs
+WHERE owner = 'SH'
+  AND table_name IN (
+      'SALES',
+      'PRODUCTS',
+      'CUSTOMERS',
+      'COUNTRIES',
+      'TIMES',
+      'CHANNELS',
+      'PROMOTIONS'
+  )
+  AND grantee IN (USER, 'PUBLIC')
+  AND privilege = 'SELECT'
+ORDER BY table_name,
+         grantee
+Error at Command Line : 122 Column : 7
+Error report -
+SQL Error: ORA-00904: "OWNER": invalid identifier
+
+https://docs.oracle.com/error-help/db/ora-00904/00904. 00000 -  "%s: invalid identifier"
+*Cause:    The identifier or column name entered was invalid.
+*Action:   Ensure the following
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-00904/
+SQL>
+SQL> PROMPT ===== TABLESPACE QUOTAS =====
+===== TABLESPACE QUOTAS =====
+SQL> SELECT tablespace_name,
+  2         bytes,
+  3         max_bytes
+  4  FROM user_ts_quotas
+  5  ORDER BY tablespace_name;
+
+0 rows selected.
+
+SQL>
+SQL> PROMPT ===== SH.SALES DATE RANGE AND ROW COUNT =====
+===== SH.SALES DATE RANGE AND ROW COUNT =====
+SQL> SELECT MIN(s.time_id) AS first_sale_date,
+  2         MAX(s.time_id) AS last_sale_date,
+  3         COUNT(*) AS sales_row_count
+  4  FROM sh.sales s;
+
+FIRST_SA LAST_SAL SALES_ROW_COUNT
+-------- -------- ---------------
+01/01/98 31/12/01          918843
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== AVAILABLE CALENDAR YEARS =====
+===== AVAILABLE CALENDAR YEARS =====
+SQL> SELECT t.calendar_year,
+  2         COUNT(*) AS sales_row_count
+  3  FROM sh.sales s
+  4  JOIN sh.times t
+  5      ON t.time_id = s.time_id
+  6  GROUP BY t.calendar_year
+  7  ORDER BY t.calendar_year;
+
+CALENDAR_YEAR SALES_ROW_COUNT
+------------- ---------------
+         1998          178834
+         1999          247945
+         2000          232646
+         2001          259418
+
+4 rows selected.
+
+SQL>
+SQL> PROMPT ===== COUNTRY REGIONS =====
+===== COUNTRY REGIONS =====
+SQL> SELECT DISTINCT c.country_region
+  2  FROM sh.countries c
+  3  ORDER BY c.country_region;
+
+COUNTRY_REGION
+--------------------
+Africa
+Americas
+Asia
+Europe
+Middle East
+Oceania
+
+6 rows selected.
+
+SQL>
+SQL> PROMPT ===== AUSTRALIA COUNTRY VALUE =====
+===== AUSTRALIA COUNTRY VALUE =====
+SQL> SELECT c.country_id,
+  2         c.country_name,
+  3         c.country_region
+  4  FROM sh.countries c
+  5  WHERE UPPER(c.country_name) LIKE '%AUSTRALIA%'
+  6  ORDER BY c.country_name;
+
+COUNTRY_ID COUNTRY_NAME                             COUNTRY_REGION
+---------- ---------------------------------------- --------------------
+     52774 Australia                                Oceania
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== CD-R AND CD-RW PRODUCT DISCOVERY =====
+===== CD-R AND CD-RW PRODUCT DISCOVERY =====
+SQL> SELECT p.prod_id,
+  2         p.prod_name,
+  3         p.prod_desc,
+  4         p.prod_subcategory,
+  5         p.prod_category
+  6  FROM sh.products p
+  7  WHERE REGEXP_LIKE(
+  8            UPPER(p.prod_name || ' ' || NVL(p.prod_desc, '')),
+  9            'CD-RW|CD-R'
+ 10        )
+ 11  ORDER BY p.prod_name,
+ 12           p.prod_id;
+
+   PROD_ID PROD_NAME
+---------- --------------------------------------------------
+PROD_DESC
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+PROD_SUBCATEGORY                                   PROD_CATEGORY
+-------------------------------------------------- --------------------------------------------------
+       113 CD-R Mini Discs
+CD-R Mini Discs with Jewel Case, 185MB, Pack of 5
+Recordable CDs                                     Software/Other
+
+       119 CD-R with Jewel Cases, pACK OF 12
+CD-R with Jewel Cases, 700MB/80 Minutes, Pack of 12
+Recordable CDs                                     Software/Other
+
+       117 CD-R, Professional Grade, Pack of 10
+CD-R, Professional Grade, Pack of 10
+Recordable CDs                                     Software/Other
+
+       116 CD-RW, High Speed Pack of 5
+CD-RW, High Speed 650MB/74 Minutes, Pack of 5
+Recordable CDs                                     Software/Other
+
+       115 CD-RW, High Speed, Pack of 10
+CD-RW, High Speed, Pack of 10
+Recordable CDs                                     Software/Other
+
+        36 Envoy External 6X CD-ROM
+Envoy External 6X CD-ROM
+CD-ROM                                             Peripherals and Accessories
+
+        37 Envoy External 8X CD-ROM
+Envoy External 8X CD-ROM
+CD-ROM                                             Peripherals and Accessories
+
+        34 External 6X CD-ROM
+External 6X CD-ROM
+CD-ROM                                             Peripherals and Accessories
+
+        35 External 8X CD-ROM
+External 8X CD-ROM
+CD-ROM                                             Peripherals and Accessories
+
+        38 Internal 6X CD-ROM
+Internal 6X CD-ROM
+CD-ROM                                             Peripherals and Accessories
+
+        39 Internal 8X CD-ROM
+Internal 8X CD-ROM
+CD-ROM                                             Peripherals and Accessories
+
+       114 Music CD-R
+Music CD-R with Spindle, 700MB, Pack of 30
+Recordable CDs                                     Software/Other
+
+       118 OraMusic CD-R, Pack of 10
+OraMusic CD-R, Pack of 10
+Recordable CDs                                     Software/Other
+
+
+13 rows selected.
+
+SQL>
+SQL> PROMPT ===== PROMOTION CATEGORY DISCOVERY =====
+===== PROMOTION CATEGORY DISCOVERY =====
+SQL> SELECT pr.promo_id,
+  2         pr.promo_name,
+  3         pr.promo_category,
+  4         pr.promo_subcategory
+  5  FROM sh.promotions pr
+  6  ORDER BY pr.promo_category,
+  7           pr.promo_id;
+
+  PROMO_ID PROMO_NAME                     PROMO_CATEGORY                 PROMO_SUBCATEGORY
+---------- ------------------------------ ------------------------------ ------------------------------
+       999 NO PROMOTION #                 NO PROMOTION                   NO RPOMOTION
+        35 TV promotion #12-35            TV                             TV commercial
+        42 TV promotion #13-42            TV                             TV program sponsorship
+        47 TV promotion #12-47            TV                             TV commercial
+        49 TV promotion #12-49            TV                             TV commercial
+        54 TV promotion #13-54            TV                             TV program sponsorship
+        61 TV promotion #12-61            TV                             TV commercial
+        66 TV promotion #13-66            TV                             TV program sponsorship
+        81 TV promotion #13-81            TV                             TV program sponsorship
+        82 TV promotion #13-82            TV                             TV program sponsorship
+        93 TV promotion #13-93            TV                             TV program sponsorship
+        94 TV promotion #13-94            TV                             TV program sponsorship
+       101 TV promotion #12-101           TV                             TV commercial
+       102 TV promotion #13-102           TV                             TV program sponsorship
+       106 TV promotion #13-106           TV                             TV program sponsorship
+       107 TV promotion #13-107           TV                             TV program sponsorship
+       110 TV promotion #30-110           TV                             promotion movie
+       114 TV promotion #13-114           TV                             TV program sponsorship
+       115 TV promotion #13-115           TV                             TV program sponsorship
+       118 TV promotion #13-118           TV                             TV program sponsorship
+       129 TV promotion #13-129           TV                             TV program sponsorship
+       130 TV promotion #30-130           TV                             promotion movie
+       132 TV promotion #13-132           TV                             TV program sponsorship
+       141 TV promotion #12-141           TV                             TV commercial
+       143 TV promotion #30-143           TV                             promotion movie
+       145 TV promotion #13-145           TV                             TV program sponsorship
+       148 TV promotion #12-148           TV                             TV commercial
+       153 TV promotion #13-153           TV                             TV program sponsorship
+       160 TV promotion #12-160           TV                             TV commercial
+       165 TV promotion #13-165           TV                             TV program sponsorship
+       169 TV promotion #12-169           TV                             TV commercial
+       172 TV promotion #12-172           TV                             TV commercial
+       177 TV promotion #13-177           TV                             TV program sponsorship
+       192 TV promotion #13-192           TV                             TV program sponsorship
+       193 TV promotion #13-193           TV                             TV program sponsorship
+       204 TV promotion #13-204           TV                             TV program sponsorship
+       205 TV promotion #13-205           TV                             TV program sponsorship
+       212 TV promotion #12-212           TV                             TV commercial
+       217 TV promotion #13-217           TV                             TV program sponsorship
+       218 TV promotion #13-218           TV                             TV program sponsorship
+       221 TV promotion #30-221           TV                             promotion movie
+       224 TV promotion #13-224           TV                             TV program sponsorship
+       225 TV promotion #13-225           TV                             TV program sponsorship
+       226 TV promotion #13-226           TV                             TV program sponsorship
+       229 TV promotion #13-229           TV                             TV program sponsorship
+       240 TV promotion #13-240           TV                             TV program sponsorship
+       241 TV promotion #30-241           TV                             promotion movie
+       243 TV promotion #13-243           TV                             TV program sponsorship
+       252 TV promotion #12-252           TV                             TV commercial
+       254 TV promotion #30-254           TV                             promotion movie
+       256 TV promotion #13-256           TV                             TV program sponsorship
+       259 TV promotion #12-259           TV                             TV commercial
+       264 TV promotion #13-264           TV                             TV program sponsorship
+       271 TV promotion #12-271           TV                             TV commercial
+       276 TV promotion #13-276           TV                             TV program sponsorship
+       283 TV promotion #12-283           TV                             TV commercial
+       288 TV promotion #13-288           TV                             TV program sponsorship
+       303 TV promotion #13-303           TV                             TV program sponsorship
+       304 TV promotion #13-304           TV                             TV program sponsorship
+       315 TV promotion #13-315           TV                             TV program sponsorship
+       316 TV promotion #13-316           TV                             TV program sponsorship
+       323 TV promotion #12-323           TV                             TV commercial
+       328 TV promotion #13-328           TV                             TV program sponsorship
+       329 TV promotion #13-329           TV                             TV program sponsorship
+       332 TV promotion #30-332           TV                             promotion movie
+       336 TV promotion #13-336           TV                             TV program sponsorship
+       337 TV promotion #13-337           TV                             TV program sponsorship
+       340 TV promotion #13-340           TV                             TV program sponsorship
+       351 TV promotion #13-351           TV                             TV program sponsorship
+       352 TV promotion #30-352           TV                             promotion movie
+       354 TV promotion #13-354           TV                             TV program sponsorship
+       363 TV promotion #12-363           TV                             TV commercial
+       365 TV promotion #30-365           TV                             promotion movie
+       367 TV promotion #13-367           TV                             TV program sponsorship
+       369 TV promotion #13-369           TV                             TV program sponsorship
+       370 TV promotion #12-370           TV                             TV commercial
+       375 TV promotion #13-375           TV                             TV program sponsorship
+       380 TV promotion #13-380           TV                             TV program sponsorship
+       382 TV promotion #12-382           TV                             TV commercial
+       387 TV promotion #13-387           TV                             TV program sponsorship
+       394 TV promotion #12-394           TV                             TV commercial
+       399 TV promotion #13-399           TV                             TV program sponsorship
+       414 TV promotion #13-414           TV                             TV program sponsorship
+       415 TV promotion #13-415           TV                             TV program sponsorship
+       426 TV promotion #13-426           TV                             TV program sponsorship
+       427 TV promotion #13-427           TV                             TV program sponsorship
+       434 TV promotion #12-434           TV                             TV commercial
+       439 TV promotion #13-439           TV                             TV program sponsorship
+       440 TV promotion #13-440           TV                             TV program sponsorship
+       443 TV promotion #30-443           TV                             promotion movie
+       447 TV promotion #13-447           TV                             TV program sponsorship
+       448 TV promotion #13-448           TV                             TV program sponsorship
+       451 TV promotion #13-451           TV                             TV program sponsorship
+       462 TV promotion #13-462           TV                             TV program sponsorship
+       463 TV promotion #30-463           TV                             promotion movie
+       465 TV promotion #13-465           TV                             TV program sponsorship
+       474 TV promotion #12-474           TV                             TV commercial
+       476 TV promotion #30-476           TV                             promotion movie
+       478 TV promotion #13-478           TV                             TV program sponsorship
+       479 TV promotion #13-479           TV                             TV program sponsorship
+       481 TV promotion #12-481           TV                             TV commercial
+       482 TV promotion #13-482           TV                             TV program sponsorship
+       483 TV promotion #13-483           TV                             TV program sponsorship
+       490 TV promotion #12-490           TV                             TV commercial
+       495 TV promotion #13-495           TV                             TV program sponsorship
+       496 TV promotion #13-496           TV                             TV program sponsorship
+       499 TV promotion #30-499           TV                             promotion movie
+       503 TV promotion #13-503           TV                             TV program sponsorship
+       504 TV promotion #13-504           TV                             TV program sponsorship
+       507 TV promotion #13-507           TV                             TV program sponsorship
+       518 TV promotion #13-518           TV                             TV program sponsorship
+       519 TV promotion #30-519           TV                             promotion movie
+       521 TV promotion #13-521           TV                             TV program sponsorship
+       530 TV promotion #12-530           TV                             TV commercial
+       532 TV promotion #30-532           TV                             promotion movie
+       534 TV promotion #13-534           TV                             TV program sponsorship
+        36 everyday low price             ad news                        newspaper
+        37 blowout sale                   ad news                        newspaper
+        39 flyer promotion #23-39         flyer                          hospital flyer
+        51 flyer promotion #23-51         flyer                          hospital flyer
+        63 flyer promotion #23-63         flyer                          hospital flyer
+        69 flyer promotion #23-69         flyer                          hospital flyer
+        92 flyer promotion #22-92         flyer                          general flyer
+        97 flyer promotion #23-97         flyer                          hospital flyer
+       104 flyer promotion #22-104        flyer                          general flyer
+       136 flyer promotion #24-136        flyer                          household flyer
+       137 flyer promotion #23-137        flyer                          hospital flyer
+       146 flyer promotion #23-146        flyer                          hospital flyer
+       150 flyer promotion #23-150        flyer                          hospital flyer
+       162 flyer promotion #23-162        flyer                          hospital flyer
+       174 flyer promotion #23-174        flyer                          hospital flyer
+       191 flyer promotion #23-191        flyer                          hospital flyer
+       203 flyer promotion #22-203        flyer                          general flyer
+       208 flyer promotion #23-208        flyer                          hospital flyer
+       215 flyer promotion #22-215        flyer                          general flyer
+       247 flyer promotion #24-247        flyer                          household flyer
+       248 flyer promotion #23-248        flyer                          hospital flyer
+       261 flyer promotion #23-261        flyer                          hospital flyer
+       273 flyer promotion #23-273        flyer                          hospital flyer
+       285 flyer promotion #23-285        flyer                          hospital flyer
+       314 flyer promotion #22-314        flyer                          general flyer
+       319 flyer promotion #23-319        flyer                          hospital flyer
+       326 flyer promotion #22-326        flyer                          general flyer
+       358 flyer promotion #24-358        flyer                          household flyer
+       359 flyer promotion #23-359        flyer                          hospital flyer
+       372 flyer promotion #23-372        flyer                          hospital flyer
+       384 flyer promotion #23-384        flyer                          hospital flyer
+       396 flyer promotion #23-396        flyer                          hospital flyer
+       425 flyer promotion #22-425        flyer                          general flyer
+       430 flyer promotion #23-430        flyer                          hospital flyer
+       437 flyer promotion #22-437        flyer                          general flyer
+       469 flyer promotion #24-469        flyer                          household flyer
+       470 flyer promotion #23-470        flyer                          hospital flyer
+       480 flyer promotion #22-480        flyer                          general flyer
+       486 flyer promotion #23-486        flyer                          hospital flyer
+       493 flyer promotion #22-493        flyer                          general flyer
+       525 flyer promotion #24-525        flyer                          household flyer
+       526 flyer promotion #23-526        flyer                          hospital flyer
+        44 internet promotion #29-44      internet                       online discount
+        50 internet promotion #25-50      internet                       loyal customer discount
+        53 internet promotion #29-53      internet                       online discount
+        57 internet promotion #25-57      internet                       loyal customer discount
+        58 internet promotion #25-58      internet                       loyal customer discount
+        64 internet promotion #29-64      internet                       online discount
+        67 internet promotion #29-67      internet                       online discount
+        71 internet promotion #29-71      internet                       online discount
+        72 internet promotion #29-72      internet                       online discount
+        77 internet promotion #29-77      internet                       online discount
+        86 internet promotion #25-86      internet                       loyal customer discount
+        87 internet promotion #14-87      internet                       ad
+        91 internet promotion #29-91      internet                       online discount
+        96 internet promotion #14-96      internet                       ad
+       100 internet promotion #14-100     internet                       ad
+       111 internet promotion #29-111     internet                       online discount
+       128 internet promotion #29-128     internet                       online discount
+       135 internet promotion #25-135     internet                       loyal customer discount
+       138 internet promotion #14-138     internet                       ad
+       139 internet promotion #29-139     internet                       online discount
+       155 internet promotion #29-155     internet                       online discount
+       161 internet promotion #25-161     internet                       loyal customer discount
+       164 internet promotion #29-164     internet                       online discount
+       168 internet promotion #25-168     internet                       loyal customer discount
+       175 internet promotion #29-175     internet                       online discount
+       178 internet promotion #29-178     internet                       online discount
+       182 internet promotion #29-182     internet                       online discount
+       183 internet promotion #29-183     internet                       online discount
+       188 internet promotion #29-188     internet                       online discount
+       197 internet promotion #25-197     internet                       loyal customer discount
+       198 internet promotion #14-198     internet                       ad
+       202 internet promotion #29-202     internet                       online discount
+       207 internet promotion #14-207     internet                       ad
+       211 internet promotion #14-211     internet                       ad
+       222 internet promotion #29-222     internet                       online discount
+       235 internet promotion #29-235     internet                       online discount
+       239 internet promotion #29-239     internet                       online discount
+       249 internet promotion #14-249     internet                       ad
+       250 internet promotion #29-250     internet                       online discount
+       266 internet promotion #29-266     internet                       online discount
+       269 internet promotion #29-269     internet                       online discount
+       272 internet promotion #25-272     internet                       loyal customer discount
+       275 internet promotion #29-275     internet                       online discount
+       279 internet promotion #25-279     internet                       loyal customer discount
+       280 internet promotion #29-280     internet                       online discount
+       286 internet promotion #29-286     internet                       online discount
+       289 internet promotion #29-289     internet                       online discount
+       293 internet promotion #29-293     internet                       online discount
+       294 internet promotion #29-294     internet                       online discount
+       299 internet promotion #29-299     internet                       online discount
+       308 internet promotion #25-308     internet                       loyal customer discount
+       309 internet promotion #14-309     internet                       ad
+       318 internet promotion #14-318     internet                       ad
+       322 internet promotion #14-322     internet                       ad
+       333 internet promotion #29-333     internet                       online discount
+       335 internet promotion #29-335     internet                       online discount
+       350 internet promotion #29-350     internet                       online discount
+       360 internet promotion #14-360     internet                       ad
+       361 internet promotion #29-361     internet                       online discount
+       377 internet promotion #29-377     internet                       online discount
+       383 internet promotion #25-383     internet                       loyal customer discount
+       386 internet promotion #29-386     internet                       online discount
+       390 internet promotion #25-390     internet                       loyal customer discount
+       397 internet promotion #29-397     internet                       online discount
+       400 internet promotion #29-400     internet                       online discount
+       404 internet promotion #29-404     internet                       online discount
+       405 internet promotion #29-405     internet                       online discount
+       410 internet promotion #29-410     internet                       online discount
+       419 internet promotion #25-419     internet                       loyal customer discount
+       420 internet promotion #14-420     internet                       ad
+       424 internet promotion #25-424     internet                       loyal customer discount
+       429 internet promotion #14-429     internet                       ad
+       433 internet promotion #14-433     internet                       ad
+       435 internet promotion #14-435     internet                       ad
+       444 internet promotion #29-444     internet                       online discount
+       461 internet promotion #29-461     internet                       online discount
+       471 internet promotion #14-471     internet                       ad
+       472 internet promotion #29-472     internet                       online discount
+       485 internet promotion #14-485     internet                       ad
+       489 internet promotion #14-489     internet                       ad
+       500 internet promotion #29-500     internet                       online discount
+       502 internet promotion #29-502     internet                       online discount
+       517 internet promotion #29-517     internet                       online discount
+       527 internet promotion #14-527     internet                       ad
+       528 internet promotion #29-528     internet                       online discount
+        68 magazine promotion #26-68      magazine                       manufacture rebate magazine
+        70 magazine promotion #26-70      magazine                       manufacture rebate magazine
+        89 magazine promotion #18-89      magazine                       coupon magazine
+        95 magazine promotion #18-95      magazine                       coupon magazine
+        98 magazine promotion #26-98      magazine                       manufacture rebate magazine
+       103 magazine promotion #18-103     magazine                       coupon magazine
+       117 magazine promotion #18-117     magazine                       coupon magazine
+       120 magazine promotion #18-120     magazine                       coupon magazine
+       125 magazine promotion #15-125     magazine                       ad magazine
+       131 magazine promotion #26-131     magazine                       manufacture rebate magazine
+       133 magazine promotion #18-133     magazine                       coupon magazine
+       134 magazine promotion #18-134     magazine                       coupon magazine
+       140 magazine promotion #15-140     magazine                       ad magazine
+       179 magazine promotion #26-179     magazine                       manufacture rebate magazine
+       181 magazine promotion #26-181     magazine                       manufacture rebate magazine
+       200 magazine promotion #18-200     magazine                       coupon magazine
+       206 magazine promotion #18-206     magazine                       coupon magazine
+       209 magazine promotion #26-209     magazine                       manufacture rebate magazine
+       214 magazine promotion #18-214     magazine                       coupon magazine
+       228 magazine promotion #18-228     magazine                       coupon magazine
+       231 magazine promotion #18-231     magazine                       coupon magazine
+       236 magazine promotion #15-236     magazine                       ad magazine
+       242 magazine promotion #26-242     magazine                       manufacture rebate magazine
+       244 magazine promotion #18-244     magazine                       coupon magazine
+       245 magazine promotion #18-245     magazine                       coupon magazine
+       246 magazine promotion #26-246     magazine                       manufacture rebate magazine
+       251 magazine promotion #15-251     magazine                       ad magazine
+       258 magazine promotion #26-258     magazine                       manufacture rebate magazine
+       290 magazine promotion #26-290     magazine                       manufacture rebate magazine
+       292 magazine promotion #26-292     magazine                       manufacture rebate magazine
+       311 magazine promotion #18-311     magazine                       coupon magazine
+       317 magazine promotion #18-317     magazine                       coupon magazine
+       320 magazine promotion #26-320     magazine                       manufacture rebate magazine
+       325 magazine promotion #18-325     magazine                       coupon magazine
+       339 magazine promotion #18-339     magazine                       coupon magazine
+       342 magazine promotion #18-342     magazine                       coupon magazine
+       347 magazine promotion #15-347     magazine                       ad magazine
+       353 magazine promotion #26-353     magazine                       manufacture rebate magazine
+       355 magazine promotion #18-355     magazine                       coupon magazine
+       356 magazine promotion #18-356     magazine                       coupon magazine
+       362 magazine promotion #15-362     magazine                       ad magazine
+       401 magazine promotion #26-401     magazine                       manufacture rebate magazine
+       403 magazine promotion #26-403     magazine                       manufacture rebate magazine
+       422 magazine promotion #18-422     magazine                       coupon magazine
+       428 magazine promotion #18-428     magazine                       coupon magazine
+       431 magazine promotion #26-431     magazine                       manufacture rebate magazine
+       436 magazine promotion #18-436     magazine                       coupon magazine
+       450 magazine promotion #18-450     magazine                       coupon magazine
+       453 magazine promotion #18-453     magazine                       coupon magazine
+       457 magazine promotion #18-457     magazine                       coupon magazine
+       458 magazine promotion #15-458     magazine                       ad magazine
+       464 magazine promotion #26-464     magazine                       manufacture rebate magazine
+       466 magazine promotion #18-466     magazine                       coupon magazine
+       467 magazine promotion #18-467     magazine                       coupon magazine
+       473 magazine promotion #15-473     magazine                       ad magazine
+       484 magazine promotion #18-484     magazine                       coupon magazine
+       487 magazine promotion #26-487     magazine                       manufacture rebate magazine
+       492 magazine promotion #18-492     magazine                       coupon magazine
+       506 magazine promotion #18-506     magazine                       coupon magazine
+       509 magazine promotion #18-509     magazine                       coupon magazine
+       514 magazine promotion #15-514     magazine                       ad magazine
+       520 magazine promotion #26-520     magazine                       manufacture rebate magazine
+       522 magazine promotion #18-522     magazine                       coupon magazine
+       523 magazine promotion #18-523     magazine                       coupon magazine
+       529 magazine promotion #15-529     magazine                       ad magazine
+        34 newspaper promotion #19-34     newspaper                      coupon news
+        40 newspaper promotion #19-40     newspaper                      coupon news
+        41 newspaper promotion #27-41     newspaper                      manufacture rebate news
+        43 newspaper promotion #16-43     newspaper                      ad news
+        45 newspaper promotion #27-45     newspaper                      manufacture rebate news
+        48 newspaper promotion #19-48     newspaper                      coupon news
+        62 newspaper promotion #19-62     newspaper                      coupon news
+        65 newspaper promotion #19-65     newspaper                      coupon news
+        76 newspaper promotion #16-76     newspaper                      ad news
+        78 newspaper promotion #19-78     newspaper                      coupon news
+        79 newspaper promotion #19-79     newspaper                      coupon news
+        83 newspaper promotion #19-83     newspaper                      coupon news
+        84 newspaper promotion #19-84     newspaper                      coupon news
+        85 newspaper promotion #19-85     newspaper                      coupon news
+        99 newspaper promotion #19-99     newspaper                      coupon news
+       105 newspaper promotion #16-105    newspaper                      ad news
+       108 newspaper promotion #16-108    newspaper                      ad news
+       119 newspaper promotion #19-119    newspaper                      coupon news
+       123 newspaper promotion #16-123    newspaper                      ad news
+       126 newspaper promotion #19-126    newspaper                      coupon news
+       127 newspaper promotion #16-127    newspaper                      ad news
+       142 newspaper promotion #27-142    newspaper                      manufacture rebate news
+       144 newspaper promotion #19-144    newspaper                      coupon news
+       151 newspaper promotion #19-151    newspaper                      coupon news
+       152 newspaper promotion #27-152    newspaper                      manufacture rebate news
+       154 newspaper promotion #16-154    newspaper                      ad news
+       156 newspaper promotion #27-156    newspaper                      manufacture rebate news
+       159 newspaper promotion #19-159    newspaper                      coupon news
+       173 newspaper promotion #19-173    newspaper                      coupon news
+       176 newspaper promotion #19-176    newspaper                      coupon news
+       180 newspaper promotion #19-180    newspaper                      coupon news
+       187 newspaper promotion #16-187    newspaper                      ad news
+       189 newspaper promotion #19-189    newspaper                      coupon news
+       190 newspaper promotion #19-190    newspaper                      coupon news
+       194 newspaper promotion #19-194    newspaper                      coupon news
+       195 newspaper promotion #19-195    newspaper                      coupon news
+       196 newspaper promotion #19-196    newspaper                      coupon news
+       210 newspaper promotion #19-210    newspaper                      coupon news
+       213 newspaper promotion #19-213    newspaper                      coupon news
+       216 newspaper promotion #16-216    newspaper                      ad news
+       219 newspaper promotion #16-219    newspaper                      ad news
+       230 newspaper promotion #19-230    newspaper                      coupon news
+       234 newspaper promotion #16-234    newspaper                      ad news
+       237 newspaper promotion #19-237    newspaper                      coupon news
+       238 newspaper promotion #16-238    newspaper                      ad news
+       253 newspaper promotion #27-253    newspaper                      manufacture rebate news
+       255 newspaper promotion #19-255    newspaper                      coupon news
+       257 newspaper promotion #19-257    newspaper                      coupon news
+       262 newspaper promotion #19-262    newspaper                      coupon news
+       263 newspaper promotion #27-263    newspaper                      manufacture rebate news
+       265 newspaper promotion #16-265    newspaper                      ad news
+       267 newspaper promotion #27-267    newspaper                      manufacture rebate news
+       270 newspaper promotion #19-270    newspaper                      coupon news
+       284 newspaper promotion #19-284    newspaper                      coupon news
+       287 newspaper promotion #19-287    newspaper                      coupon news
+       298 newspaper promotion #16-298    newspaper                      ad news
+       300 newspaper promotion #19-300    newspaper                      coupon news
+       301 newspaper promotion #19-301    newspaper                      coupon news
+       305 newspaper promotion #19-305    newspaper                      coupon news
+       306 newspaper promotion #19-306    newspaper                      coupon news
+       307 newspaper promotion #19-307    newspaper                      coupon news
+       321 newspaper promotion #19-321    newspaper                      coupon news
+       324 newspaper promotion #16-324    newspaper                      ad news
+       327 newspaper promotion #16-327    newspaper                      ad news
+       330 newspaper promotion #16-330    newspaper                      ad news
+       341 newspaper promotion #19-341    newspaper                      coupon news
+       345 newspaper promotion #16-345    newspaper                      ad news
+       346 newspaper promotion #19-346    newspaper                      coupon news
+       348 newspaper promotion #19-348    newspaper                      coupon news
+       349 newspaper promotion #16-349    newspaper                      ad news
+       357 newspaper promotion #19-357    newspaper                      coupon news
+       364 newspaper promotion #27-364    newspaper                      manufacture rebate news
+       366 newspaper promotion #19-366    newspaper                      coupon news
+       368 newspaper promotion #27-368    newspaper                      manufacture rebate news
+       373 newspaper promotion #19-373    newspaper                      coupon news
+       374 newspaper promotion #27-374    newspaper                      manufacture rebate news
+       376 newspaper promotion #16-376    newspaper                      ad news
+       378 newspaper promotion #27-378    newspaper                      manufacture rebate news
+       381 newspaper promotion #19-381    newspaper                      coupon news
+       391 newspaper promotion #19-391    newspaper                      coupon news
+       395 newspaper promotion #19-395    newspaper                      coupon news
+       398 newspaper promotion #19-398    newspaper                      coupon news
+       402 newspaper promotion #19-402    newspaper                      coupon news
+       409 newspaper promotion #16-409    newspaper                      ad news
+       411 newspaper promotion #19-411    newspaper                      coupon news
+       412 newspaper promotion #19-412    newspaper                      coupon news
+       413 newspaper promotion #19-413    newspaper                      coupon news
+       416 newspaper promotion #19-416    newspaper                      coupon news
+       417 newspaper promotion #19-417    newspaper                      coupon news
+       418 newspaper promotion #19-418    newspaper                      coupon news
+       432 newspaper promotion #19-432    newspaper                      coupon news
+       438 newspaper promotion #16-438    newspaper                      ad news
+       441 newspaper promotion #16-441    newspaper                      ad news
+       452 newspaper promotion #19-452    newspaper                      coupon news
+       456 newspaper promotion #16-456    newspaper                      ad news
+       459 newspaper promotion #19-459    newspaper                      coupon news
+       460 newspaper promotion #16-460    newspaper                      ad news
+       475 newspaper promotion #27-475    newspaper                      manufacture rebate news
+       477 newspaper promotion #19-477    newspaper                      coupon news
+       488 newspaper promotion #19-488    newspaper                      coupon news
+       491 newspaper promotion #16-491    newspaper                      ad news
+       494 newspaper promotion #16-494    newspaper                      ad news
+       497 newspaper promotion #16-497    newspaper                      ad news
+       508 newspaper promotion #19-508    newspaper                      coupon news
+       512 newspaper promotion #16-512    newspaper                      ad news
+       513 newspaper promotion #27-513    newspaper                      manufacture rebate news
+       515 newspaper promotion #19-515    newspaper                      coupon news
+       516 newspaper promotion #16-516    newspaper                      ad news
+       531 newspaper promotion #27-531    newspaper                      manufacture rebate news
+       533 newspaper promotion #19-533    newspaper                      coupon news
+        33 post promotion #20-33          post                           downtown billboard
+        38 post promotion #20-38          post                           downtown billboard
+        46 post promotion #17-46          post                           billboard
+        52 post promotion #20-52          post                           downtown billboard
+        55 post promotion #21-55          post                           freeway billboard
+        59 post promotion #20-59          post                           downtown billboard
+        60 post promotion #20-60          post                           downtown billboard
+        74 post promotion #20-74          post                           downtown billboard
+        75 post promotion #21-75          post                           freeway billboard
+        80 post promotion #20-80          post                           downtown billboard
+        88 post promotion #21-88          post                           freeway billboard
+        90 post promotion #20-90          post                           downtown billboard
+       109 post promotion #21-109         post                           freeway billboard
+       113 post promotion #21-113         post                           freeway billboard
+       116 post promotion #20-116         post                           downtown billboard
+       121 post promotion #20-121         post                           downtown billboard
+       147 post promotion #20-147         post                           downtown billboard
+       149 post promotion #20-149         post                           downtown billboard
+       157 post promotion #17-157         post                           billboard
+       158 post promotion #20-158         post                           downtown billboard
+       163 post promotion #20-163         post                           downtown billboard
+       166 post promotion #21-166         post                           freeway billboard
+       170 post promotion #20-170         post                           downtown billboard
+       171 post promotion #20-171         post                           downtown billboard
+       185 post promotion #20-185         post                           downtown billboard
+       186 post promotion #21-186         post                           freeway billboard
+       199 post promotion #21-199         post                           freeway billboard
+       201 post promotion #20-201         post                           downtown billboard
+       220 post promotion #21-220         post                           freeway billboard
+       227 post promotion #20-227         post                           downtown billboard
+       232 post promotion #20-232         post                           downtown billboard
+       260 post promotion #20-260         post                           downtown billboard
+       268 post promotion #17-268         post                           billboard
+       274 post promotion #20-274         post                           downtown billboard
+       277 post promotion #21-277         post                           freeway billboard
+       281 post promotion #20-281         post                           downtown billboard
+       282 post promotion #20-282         post                           downtown billboard
+       296 post promotion #20-296         post                           downtown billboard
+       297 post promotion #21-297         post                           freeway billboard
+       302 post promotion #20-302         post                           downtown billboard
+       310 post promotion #21-310         post                           freeway billboard
+       312 post promotion #20-312         post                           downtown billboard
+       313 post promotion #21-313         post                           freeway billboard
+       331 post promotion #21-331         post                           freeway billboard
+       338 post promotion #20-338         post                           downtown billboard
+       343 post promotion #20-343         post                           downtown billboard
+       371 post promotion #20-371         post                           downtown billboard
+       379 post promotion #17-379         post                           billboard
+       385 post promotion #20-385         post                           downtown billboard
+       388 post promotion #21-388         post                           freeway billboard
+       392 post promotion #20-392         post                           downtown billboard
+       393 post promotion #20-393         post                           downtown billboard
+       407 post promotion #20-407         post                           downtown billboard
+       408 post promotion #21-408         post                           freeway billboard
+       421 post promotion #21-421         post                           freeway billboard
+       423 post promotion #20-423         post                           downtown billboard
+       442 post promotion #21-442         post                           freeway billboard
+       446 post promotion #21-446         post                           freeway billboard
+       449 post promotion #20-449         post                           downtown billboard
+       454 post promotion #20-454         post                           downtown billboard
+       468 post promotion #20-468         post                           downtown billboard
+       498 post promotion #21-498         post                           freeway billboard
+       505 post promotion #20-505         post                           downtown billboard
+       510 post promotion #20-510         post                           downtown billboard
+       524 post promotion #17-524         post                           billboard
+        56 radio promotion #32-56         radio                          radio program sponsorship
+        73 radio promotion #32-73         radio                          radio program sponsorship
+       112 radio promotion #31-112        radio                          radio commercial
+       122 radio promotion #32-122        radio                          radio program sponsorship
+       124 radio promotion #32-124        radio                          radio program sponsorship
+       167 radio promotion #32-167        radio                          radio program sponsorship
+       184 radio promotion #32-184        radio                          radio program sponsorship
+       223 radio promotion #31-223        radio                          radio commercial
+       233 radio promotion #32-233        radio                          radio program sponsorship
+       278 radio promotion #32-278        radio                          radio program sponsorship
+       291 radio promotion #32-291        radio                          radio program sponsorship
+       295 radio promotion #32-295        radio                          radio program sponsorship
+       334 radio promotion #31-334        radio                          radio commercial
+       344 radio promotion #32-344        radio                          radio program sponsorship
+
+  PROMO_ID PROMO_NAME                     PROMO_CATEGORY                 PROMO_SUBCATEGORY
+---------- ------------------------------ ------------------------------ ------------------------------
+       389 radio promotion #32-389        radio                          radio program sponsorship
+       406 radio promotion #32-406        radio                          radio program sponsorship
+       445 radio promotion #31-445        radio                          radio commercial
+       455 radio promotion #32-455        radio                          radio program sponsorship
+       501 radio promotion #31-501        radio                          radio commercial
+       511 radio promotion #32-511        radio                          radio program sponsorship
+
+503 rows selected.
+
+SQL>
+SQL> PROMPT ===== POSSIBLE NO-PROMOTION VALUES =====
+===== POSSIBLE NO-PROMOTION VALUES =====
+SQL> SELECT pr.promo_id,
+  2         pr.promo_name,
+  3         pr.promo_category,
+  4         pr.promo_subcategory
+  5  FROM sh.promotions pr
+  6  WHERE UPPER(
+  7            NVL(pr.promo_name, '') || ' ' ||
+  8            NVL(pr.promo_category, '') || ' ' ||
+  9            NVL(pr.promo_subcategory, '')
+ 10        ) LIKE '%NO PROMO%'
+ 11  ORDER BY pr.promo_id;
+
+  PROMO_ID PROMO_NAME                     PROMO_CATEGORY                 PROMO_SUBCATEGORY
+---------- ------------------------------ ------------------------------ ------------------------------
+       999 NO PROMOTION #                 NO PROMOTION                   NO RPOMOTION
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== MONTH DESCRIPTION FORMAT AND RANGE =====
+===== MONTH DESCRIPTION FORMAT AND RANGE =====
+SQL> SELECT MIN(t.calendar_month_desc) AS first_month_desc,
+  2         MAX(t.calendar_month_desc) AS last_month_desc,
+  3         COUNT(DISTINCT t.calendar_month_desc) AS month_count
+  4  FROM sh.times t
+  5  WHERE t.calendar_year BETWEEN 1998 AND 2001;
+
+FIRST_MO LAST_MON MONTH_COUNT
+-------- -------- -----------
+1998-01  2001-12           48
+
+1 row selected.
+
+SQL>
+SQL> SELECT DISTINCT t.calendar_year,
+  2         t.calendar_month_number,
+  3         t.calendar_month_desc
+  4  FROM sh.times t
+  5  WHERE t.calendar_year BETWEEN 1998 AND 2001
+  6  ORDER BY t.calendar_year,
+  7           t.calendar_month_number;
+
+CALENDAR_YEAR CALENDAR_MONTH_NUMBER CALENDAR
+------------- --------------------- --------
+         1998                     1 1998-01
+         1998                     2 1998-02
+         1998                     3 1998-03
+         1998                     4 1998-04
+         1998                     5 1998-05
+         1998                     6 1998-06
+         1998                     7 1998-07
+         1998                     8 1998-08
+         1998                     9 1998-09
+         1998                    10 1998-10
+         1998                    11 1998-11
+         1998                    12 1998-12
+         1999                     1 1999-01
+         1999                     2 1999-02
+         1999                     3 1999-03
+         1999                     4 1999-04
+         1999                     5 1999-05
+         1999                     6 1999-06
+         1999                     7 1999-07
+         1999                     8 1999-08
+         1999                     9 1999-09
+         1999                    10 1999-10
+         1999                    11 1999-11
+         1999                    12 1999-12
+         2000                     1 2000-01
+         2000                     2 2000-02
+         2000                     3 2000-03
+         2000                     4 2000-04
+         2000                     5 2000-05
+         2000                     6 2000-06
+         2000                     7 2000-07
+         2000                     8 2000-08
+         2000                     9 2000-09
+         2000                    10 2000-10
+         2000                    11 2000-11
+         2000                    12 2000-12
+         2001                     1 2001-01
+         2001                     2 2001-02
+         2001                     3 2001-03
+         2001                     4 2001-04
+         2001                     5 2001-05
+         2001                     6 2001-06
+         2001                     7 2001-07
+         2001                     8 2001-08
+         2001                     9 2001-09
+         2001                    10 2001-10
+         2001                    11 2001-11
+         2001                    12 2001-12
+
+48 rows selected.
+
+SQL>
+SQL> PROMPT ===== PREFLIGHT COMPLETE =====
+===== PREFLIGHT COMPLETE =====
+SQL> SPOOL OFF

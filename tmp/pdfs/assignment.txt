@@ -1,0 +1,611 @@
+
+===== PAGE 1 =====
+                                                                                  
+                                                                                  
+                                                                                  
+       COMP810 Data Warehousing and Big Data           Data Warehousing Project 2026
+                                                                                  
+                                                                                  
+                COMP810:    Data Warehouse    and Big Data                        
+                                                                                  
+                        Data Warehousing    Project                               
+                                                                                  
+                              (Weight:  50%)                                      
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+            SUBMIT   TO  CANVAS   BY  23:59, Friday 23 Oct 2026                   
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+       Table  of Contents                                                         
+                                                                                  
+       Project Overview ............................................................................................................................................... 2
+         1.1 Group Work ........................................................................................................................................... 2
+                                                                                  
+       Section A - Data Warehouse Schema: Design and Implementation (42 marks) .................................... 2
+         A.1  Business Overview ........................................................................................................................... 2
+                                                                                  
+         A.2  Data specifications ............................................................................................................................ 3
+                                                                                  
+          A.2.1 Current Design ............................................................................................................................... 3
+          A.2.2 ETL ................................................................................................................................................... 3
+                                                                                  
+         A.3  Schema Design ................................................................................................................................. 4
+          A.3.1 Things to consider .......................................................................................................................... 4
+                                                                                  
+         A.4 Drawing DW Schema ............................................................................................................................ 4
+         A.5 Creating the Tables ............................................................................................................................... 4
+                                                                                  
+         A.6 What to submit ....................................................................................................................................... 4
+                                                                                  
+       Section B — Multidimensional Data Analysis (50 marks) ......................................................................... 5
+         B.1 Instructions ............................................................................................................................................. 5
+                                                                                  
+         B.2 Short-answer questions ........................................................................................................................ 5
+         B.3 Long-answer questions ......................................................................................................................... 6
+                                                                                  
+       Submission Requirements (8 marks) ................................................................................................................... 7
+       Additional Submission Information ..................................................................................................................... 7
+                                                                                  
+       Regulations for GAI tools such as ChatGPT ......................................................................................................... 8
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                   Page | 1       
+                                                                                  
+                                                                                  
+                                                                                  
+
+===== PAGE 2 =====
+                                                                                  
+                                                                                  
+                                                                                  
+       COMP810 Data Warehousing and Big Data           Data Warehousing Project 2026
+                                                                                  
+                                                                                  
+       Project  Overview                                                          
+        This assessment is designed to assess the following learning outcomes:    
+                                                                                  
+        1. Critically reflect on in-demand data warehouse designs, their role in a decision-making
+                                                                                  
+          process, advantages and potential problem areas.                        
+        2. Critically appraise data modelling options to design data warehouse schemas using
+          contemporary patterns, including but not limited to Star and Snowflake. 
+        3. Understand and demonstrate knowledge of advanced SQL techniques to access,
+          aggregate and analyse data from big relational databases.               
+                                                                                  
+                                                                                  
+        In a nutshell, it consists of two sections. In the first section, you need to design and implement
+        a data warehouse. In the second section, you will write some queries to answer some specific
+        questions based on a given schema.                                        
+                                                                                  
+       1.1 Group Work                                                             
+                                                                                  
+       This is a Group Assignment (two members max). Liaise with your classmates and create your
+       team of two people. Notes:                                                 
+                                                                                  
+          (a) Students can choose to work individually; there will be NO penalty. In other words, this
+            Project will be marked up to the same standards and marking criteria, regardless of
+            whether you work alone or in a group of two students.                 
+                                                                                  
+          (b) Please form a group on Canvas by yourself by 2 Oct. Alternatively, email name/s
+            and student/s ID of your team (one or two students) to Ryan (ryan.ip@aut.ac.nz). You
+            will be assumed to be working individually if you did not sign up or indicate your group.
+                                                                                  
+                                                                                  
+      Section  A - Data Warehouse  Schema:  Design  and Implementation  (42       
+                                                                                  
+      marks)                                                                      
+                                                                                  
+                                                                                  
+       A case study for an Auckland-based business ‘PhoneFix’, our client, is given below. You have
+       been asked:                                                                
+                                                                                  
+          (a) to choose a data warehouse design for the client, with explanations provided and,
+                                                                                  
+          (b) to draw a diagram to represent the logical schema you propose. You will then create
+          the resulting data warehouse tables in Oracle.                          
+                                                                                  
+       A.1  Business Overview                                                     
+                                                                                  
+                                                                                  
+       ‘PhoneFix’ sells mobile phone accessories and repairs mobile phones, with more than ten
+       stores located within Auckland. Each of the ‘PhoneFix’ stores is independently run by a
+       different owner (similar to a co-operative). As such, each owner manages the data differently.
+       As the business grows, the headquarter is planning to implement a data warehouse system
+       that can store and analyse data for decision-making. Specifically, the data manager at the
+       headquarter would like to oversee the performance of different stores, and be able to analyse
+       customers’ behaviour.                                                      
+                                                                                  
+                                                                   Page | 2       
+                                                                                  
+                                                                                  
+                                                                                  
+
+===== PAGE 3 =====
+                                                                                  
+                                                                                  
+                                                                                  
+       COMP810 Data Warehousing and Big Data           Data Warehousing Project 2026
+                                                                                  
+                                                                                  
+                Store 1                                                           
+                                                      Store 2                     
+                   Transactions                  Transactions                     
+                                                                                  
+                                                                                  
+                   Inventories        Join       Inventories                      
+                                                                                  
+                                                                                  
+                   Income/Loss                   Income/Loss                      
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                      DW                                          
+                                                                                  
+                                                                                  
+            Figure 1: An overview of data integration in PhoneFix, with two stores shown
+                                                                                  
+                 Transaction           Client            Inventory                
+                                                                                  
+                TRANSACTION_ID      CLIENT_ID           PRODUCT_ID                
+                PRODUCT_ID          CLIENT_NAME         SUPPLIER_ID               
+                CLIENT_ID           ADDRESS             SUPPLIER_NAME             
+                CLIENT_NAME         DATE_OF_BIRTH       COST                      
+                D                                                                 
+                Q                                                                 
+                 A                                                                
+                 U                                                                
+                  T                                                               
+                  A                                                               
+                   E                                                              
+                   N TITY                                                         
+                                    I                                             
+                                    O                                             
+                                    N                                             
+                                     C                                            
+                                     C                                            
+                                      C                                           
+                                      O                                           
+                                      U                                           
+                                       M                                          
+                                       P                                          
+                                        E                                         
+                                        A                                         
+                                        _                                         
+                                         T                                        
+                                         R                                        
+                                         IO                                       
+                                          AN                                      
+                                           N                                      
+                                           G E          Q                         
+                                                        PR                        
+                                                        U                         
+                                                         I                        
+                                                         A                        
+                                                         C                        
+                                                          N                       
+                                                          E                       
+                                                           T ITY                  
+                PRICE                                                             
+                 Figure 2: Three example tables used by the owner of Store 1      
+       A.2  Data specifications                                                   
+       A.2.1 Current Design                                                       
+       Currently, the individual owners decide their own data storage method. At the end of each
+       quarter, each owner sends an Excel file to the headquarter detailing the income/ loss,
+       transaction records, as well as inventories. These Excel files are then joined to form a data
+       warehouse (DW). Figures 1 shows a schematic workflow (of course, there are more stores
+       in reality). Some example tables used by one of the store managers is shown in Figure 2,
+       where the primary keys are underlined.                                     
+       A.2.2 ETL                                                                  
+       Extraction Transformation & Load (ETL): ETL could be identified as a potential issue.
+       However, throughout this assessment, you can assume that ETL can essentially be
+       managed.                                                                   
+                                                                   Page | 3       
+
+===== PAGE 4 =====
+                                                                                  
+                                                                                  
+                                                                                  
+       COMP810 Data Warehousing and Big Data           Data Warehousing Project 2026
+                                                                                  
+                                                                                  
+       A.3  Schema Design                                                         
+                                                                                  
+       Because the IT people at PhoneFix have never taken COMP810, they do not know much
+       about data warehousing. They have approached you for some suggestions to improve the
+       current DW by designing a better schema. By considering their requirements, you are
+       required to design a logical schema for the Data Warehouse (DW). You can choose either
+       the STAR schema or the SNOWFLAKE schema.                                   
+                                                                                  
+       Explain the deficiencies of the current DW design used by PhoneFix, justify your choice of
+                                                                                  
+       schema and the composition of the fact and dimension tables, and explain the comparative
+       advantages of your proposed design over the existing one.                  
+                                                                                  
+       A.3.1 Things to consider                                                   
+                                                                                  
+       The logical schema for the DW represents aggregated data for specific business activities.
+       Using the schema, one can create multiple aggregated data sources that will represent
+       different aspects of business operations. For example, the aggregation may involve total
+       sales by selected time periods, by product, by client, and so on.          
+                                                                                  
+       Some aggregated totals to consider are: total products sold, total sales values by product,
+       etc. The basic star and snowflake schemas have three main components: facts, dimensions,
+       attributes. Consider what constitutes the fact and dimension tables. To determine the correct
+                                                                                  
+       dimension tables and attributes, you will need to consider the attributes shown in Figure 2.
+       However, you do not need to limit yourself to the attributes shown. Feel free to use your
+       imagination and creativity to make your schema more suitable for the client.
+                                                                                  
+                                                                                  
+                                                                                  
+       A.4 Drawing DW Schema                                                      
+                                                                                  
+       Use a Data Modelling software to draw the DW Schema, such as Microsoft Visio or EDRplus.
+       Visio is available in AUT computers. If you use some other Data Modelling software, be aware
+       that all required elements of the ERD may not be clearly shown.            
+                                                                                  
+                                                                                  
+                                                                                  
+       A.5 Creating the Tables                                                    
+       Hence, create the required tables using Oracle. You do not need to insert any records in the
+       tables. Submit the code and the descriptions (using DESC) of all tables created (e.g., by
+       screenshots).                                                              
+                                                                                  
+                                                                                  
+       A.6 What to submit                                                         
+                                                                                  
+       To summarise, for this section, you need (1) explanations and justifications of your design
+       [this should be written concisely with not more than 2 pages excluding references, if any],
+       (2) a diagram representing the schema for the DW, (3) the Oracle SQL code needed to
+       create the tables, and (4) the descriptions (using DESC) of all tables created. Check the
+       rubrics on Canvas for a detailed breakdown of the marks in this section.   
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                   Page | 4       
+                                                                                  
+                                                                                  
+                                                                                  
+
+===== PAGE 5 =====
+                                                                                  
+                                                                                  
+                                                                                  
+       COMP810 Data Warehousing and Big Data           Data Warehousing Project 2026
+                                                                                  
+                                                                                  
+       Section  B —  Multidimensional   Data Analysis  (50 marks)                 
+                                                                                  
+                                                                                  
+       In this Section, we concentrate on multidimensional data analysis. We use the SH Sample
+       Schema available in SQL (with prefix ‘sh.’; e.g., you can bring the sales table up using
+       SELECT * FROM sh.sales). The schema diagram is available on Canvas (you can ignore
+                                                                                  
+       the costs table for this assessment).                                      
+                                                                                  
+       B.1 Instructions                                                           
+                                                                                  
+       Answer the following questions. Write appropriate SQL code to generate the results. Include
+       both the query (SQL code), the output (e.g., screenshots) and a conclusion in your answer.
+                                                                                  
+       Marks: 6 marks each for Q1-Q5 (4 marks code and output + 2 marks conclusion in writing),
+       and 10 marks each for Q6-Q7 (5 marks code and chart + 5 marks writing).    
+                                                                                  
+                                                                                  
+       B.2 Short-answer questions                                                 
+                                                                                  
+                                                                                  
+       Question 1 Find and display the top five countries with the highest total sales (based on
+       amount_sold) in 2000 and 2001. Display the regions of the countries (country_region) where the
+                                                                                  
+       customers were based, names of these countries (country_name), and the total sales amount
+       (rounded to the nearest dollar, presented in a format like ‘$123,456,789.00’) as follows:
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+       Question 2 By using GROUP BY ROLLUP, find and display (as follows) the total sales amount of
+       all types of CD-R or CD-RW sold in all countries in Europe. In displaying the sales amount, replace
+       the decimal places by ‘xx’ (i.e., in a format like ‘$123,456,789.xx’). Display the output as follows:
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+       Question 3 Write a query involving a nested query to find and display the product that was sold the
+       most (in terms of quantity) in Australia, in each year between 1998 and 2001 (inclusive). Display the
+       output as follows:                                                         
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+       Question 4 Find and display the top three most common sales channels (according to quantity) for
+       all countries not in Europe that had a total sales amount greater than $500,000 in 1999. Display the
+       output as follows:                                                         
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                   Page | 5       
+                                                                                  
+                                                                                  
+                                                                                  
+
+===== PAGE 6 =====
+                                                                                  
+                                                                                  
+                                                                                  
+       COMP810 Data Warehousing and Big Data           Data Warehousing Project 2026
+                                                                                  
+                                                                                  
+       Question 5 Create a materialised view named “Promotion_Analysis_mv” that summarises the total
+       sales amount of all products under each promotion category in each calendar month between 1998
+       and 2001 (inclusive). Order by calendar_month_desc in ascending order, then total sales in
+       descending order. The column names appear below. Take a screenshot of the table and crop it to
+       show only the first 10 records. Briefly explain what the materialised view shows.
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+       B.3 Long-answer questions                                                  
+       Question 6 Use the materialised view created in Q5 to make a chart report comparing the total
+       sales under each promotion category. The management is deciding on which kind of promotion (if
+       any) the company should focus on in the first quarter of 2002. Based on the information, write 3 – 4
+       sentences making a recommendation to the management.                       
+                                                                                  
+                                                                                  
+       Question 7 Use the materialised view created in Q5 to make a chart report summarising some
+                                                                                  
+       information of your choice against time. The information should be significantly different from that
+       used in Q6. Use this chart to provide some recommendations for the management. Write 3 – 4
+       sentences describing (a) why do you think this information would be useful, and (b) your
+       recommendations.                                                           
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                   Page | 6       
+                                                                                  
+                                                                                  
+                                                                                  
+
+===== PAGE 7 =====
+                                                                                  
+                                                                                  
+                                                                                  
+       COMP810 Data Warehousing and Big Data           Data Warehousing Project 2026
+                                                                                  
+                                                                                  
+       Submission  Requirements  and Presentation (8 marks)                       
+       Submit the following to Canvas:                                            
+                                                                                  
+          • A Word/Pdf file with your answers (including all necessary diagrams and charts), SQL
+                                                                                  
+            code and output and answers for both Sections A and B.                
+          • An SQL script named ‘createDW.sql’ with your statements used to create DW tables
+            for Section A, and                                                    
+          • An SQL script named ‘queriesDW.sql’ with all your queries for Section B.
+                                                                                  
+          NOTES:                                                                  
+                                                                                  
+          (a) Although it’s a requirement to submit the .sql files, we will only mark the Word/ PDF
+                                                                                  
+            file. The .sql files are for cross-checking purposes, in case needed, only.
+          (b) A rubric is available on Canvas.                                    
+          (c) The overall structure and quality (including writing, grammar, etc.) of the report should
+            be at an acceptable professional standard.                            
+          (d) Figures and Tables, if any, use appropriate captions and refer to them in your answers.
+                                                                                  
+          (e) Include references, if any, in the References section.              
+          (f) Include an AI Use Log in the Appendix.                              
+          (g) You may not receive the full 8 marks if any of the above is not satisfied.
+                                                                                  
+       Additional Submission Information                                          
+                                                                                  
+                                                                                  
+       The ‘Data Warehouse Project’ must be submitted to Canvas and will undergo Turnitin
+       checks. This means that your report will be assessed through the Turnitin system, and in
+       case of plagiarism, the University policy against plagiarism will be applied. The teaching staff
+       reserves the right to file an ‘Integrity Breach Report’ if we obtain sufficient evidence confirming
+       this.                                                                      
+                                                                                  
+       You can register for academic integrity and paraphrasing training in the AUT Library and
+                                                                                  
+       search for online resources. If you are using any material or figures in the assessment that is
+       not your own, do remember to cite/reference the source.                    
+                                                                                  
+       Two weeks before the deadline, a Canvas submission link will be available for students to
+       submit their work. You can submit your assignments as many times as you like before the
+       deadline and you will receive a Similarity Report from Turnitin for your guidance. All content
+       must be of your authorship.                                                
+                                                                                  
+                                                                                  
+       Late Submissions                                                           
+                                                                                  
+       As per policy, failure to submit the assignment on time without special consideration approved
+       will result in a penalty in accordance with the faculty policy (i.e., 5% per day up to a maximum
+       of 5 days). If you experience any extenuating circumstances that prevent timely submission,
+       please apply for special consideration via Canvas.                         
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                   Page | 7       
+                                                                                  
+                                                                                  
+                                                                                  
+
+===== PAGE 8 =====
+                                                                                  
+                                                                                  
+                                                                                  
+       COMP810 Data Warehousing and Big Data           Data Warehousing Project 2026
+                                                                                  
+                                                                                  
+       If you intend to lodge a Special Consideration Application, please hold your assignment
+       submission. If the student submits an SCA along with the assignment before the due
+       date, the late submission will NOT be graded.                              
+                                                                                  
+                                                                                  
+       Extension                                                                  
+                                                                                  
+       Extensions will only be considered when a Special Consideration Application is made
+       via Canvas. When in doubt, check with your instructors and the Programme Leader.
+                                                                                  
+       Plagiarism                                                                 
+                                                                                  
+          • Plagiarism: If the assignment is classified as plagiarism (the overall similarity
+            score is above 25%), all the items will be given 0. Do check your similarity report
+            immediately after submission. Revise the report and resubmit it if it doesn't meet
+            the requirements. If a particular section has a very high similarity score, a
+            penalty for that section will be applied. Copying data analysis from online
+            resources, e.g., Kaggle, will be considered plagiarism.               
+          • Plagiarism with GenAI: If we suspect a significant portion of the report has been
+            generated by a GenAI tool, we reserve the right to require the students to
+            present and discuss the big data report in person through an interview format.
+                                                                                  
+          • Missing AI Use Log or Code: a 10% penalty will be applied if the report is
+            submitted without the required Declaration of AI Use (AI Use Log) or code for data
+            analysis. This applies whether or not any AI tool was used, as a declaration
+            stating that no tool was used is still required.                      
+                                                                                  
+                                                                                  
+                                                                                  
+       Assignment Feedback                                                        
+                                                                                  
+       Grades for the assignment, together with feedback, will be available on Canvas upon
+       completion of marking. This will take approximately 2 to 3 weeks.          
+                                                                                  
+                                                                                  
+                                                                                  
+       Regulations for GAI tools                                                  
+                                                                                  
+                                                                                  
+       What Students Can Do with Generative AI Tools Like ChatGPT:                
+                                                                                  
+          • Idea Generation: Students can use GenAI to brainstorm ideas or get suggestions to
+            choose their report topic. This tool can be beneficial in providing different
+            perspectives on a subject. Students are required to search Google Scholar to verify
+            any idea provided by the GAI.                                         
+                                                                                  
+                                                                                  
+          • Research Assistance: GenAI can provide summaries and explanations of complex
+            concepts, which can be beneficial for students in their initial stages of research. It
+            can also suggest further reading or resources to deepen their understanding.
+            However, all the suggested readings MUST be verified by the student.  
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                   Page | 8       
+                                                                                  
+                                                                                  
+                                                                                  
+
+===== PAGE 9 =====
+                                                                                  
+                                                                                  
+                                                                                  
+       COMP810 Data Warehousing and Big Data           Data Warehousing Project 2026
+                                                                                  
+                                                                                  
+          • Technical Support: Students can use GenAI to troubleshoot and seek solutions to
+            technical problems they might encounter during their projects. By posing their issues
+            as questions, GenAI can offer potential solutions or direct students to relevant
+            resources.                                                            
+                                                                                  
+          • Proofreading & Editing: Students can use GenAI to check their grammar,
+            punctuation, and spelling. It can provide suggestions for rephrasing sentences or
+            improving the flow of the report.                                     
+                                                                                  
+                                                                                  
+       What Students Should NOT Do with GenAI Tools Like ChatGPT:                 
+                                                                                  
+                                                                                  
+          • Plagiarize: Students are not allowed to use the output from GenAI without giving
+            proper attribution or without adding their own understanding and analysis. Academic
+            integrity is paramount; directly copying from an AI output is considered plagiarism.
+            Specifically, students are prohibited from utilising GenAI to produce paragraphs that
+            are then directly copied into their reports.                          
+                                                                                  
+          • Sole Source of Information: GenAI should not be the sole source of information for
+            a report. Students should verify any facts or information from GenAI against other
+            reliable academic sources, such as Google Scholar.                    
+                                                                                  
+          • Over-reliance: DO NOT over-rely on GenAI to provide ideas. The tool should be
+            used as an assistant, not a substitute, for their own critical thinking and writing skills.
+                                                                                  
+                                                                                  
+          • Unverified Information: Students should not directly take the information provided
+            by GenAI, e.g., generate whole paragraphs of related works. It's crucial to verify
+            information using reputable, peer-reviewed sources, as GenAI tools can contain
+            errors or outdated information.                                       
+                                                                                  
+       Mandatory Declaration of AI Use (AI Use Log)                               
+                                                                                  
+       Every submission must include a short AI Use Log in the report appendix (the appendix is
+       not counted towards the page limit). The log is required for the submission. For each
+       generative AI tool used, state the tool's name, the sections in which it was used, and what it
+       was used for (e.g., brainstorming the topic, explaining a concept, or proofreading). If you did
+       not use any AI tool, you must still include the log and state that no AI tool was used. The log
+       itself is not marked for content, but an honest and specific log is expected. Where the log is
+       inconsistent with the submitted report, or where the report shows signs of unverified AI-
+                                                                                  
+       generated content, the case may be referred under the academic integrity process, and the
+       in-person interview described below may be required.                       
+                                                                                  
+       Suggested format for each entry: Tool (e.g., ChatGPT) | Section(s) used | Purpose | How
+       the output was verified or revised.                                        
+                                                                                  
+       For questions, please contact ryan.ip@aut.ac.nz                            
+                                                                                  
+                                                                                  
+                                                                                  
+                          END OF DW PROJECT DESCRIPTION                           
+                                                                                  
+                                                                   Page | 9       
+                                                                                  
+                                                                                  
+                                                                                  

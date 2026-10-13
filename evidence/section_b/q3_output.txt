@@ -1,0 +1,109 @@
+SQL>
+SQL> PROMPT ===== Q3 ANSWER; DENSE_RANK RETAINS TIES =====
+===== Q3 ANSWER; DENSE_RANK RETAINS TIES =====
+SQL> SELECT calendar_year AS CALENDAR_YEAR,
+  2         prod_id AS PROD_ID,
+  3         prod_name AS PROD_NAME,
+  4         total_quantity AS TOTAL_QUANTITY
+  5  FROM (
+  6      SELECT product_year_totals.*,
+  7             DENSE_RANK() OVER (
+  8                 PARTITION BY calendar_year
+  9                 ORDER BY total_quantity DESC
+ 10             ) AS quantity_rank
+ 11      FROM (
+ 12          SELECT t.calendar_year,
+ 13                 p.prod_id,
+ 14                 p.prod_name,
+ 15                 SUM(s.quantity_sold) AS total_quantity
+ 16          FROM sh.sales s
+ 17          JOIN sh.times t ON t.time_id = s.time_id
+ 18          JOIN sh.products p ON p.prod_id = s.prod_id
+ 19          JOIN sh.customers cu ON cu.cust_id = s.cust_id
+ 20          JOIN sh.countries c ON c.country_id = cu.country_id
+ 21          WHERE c.country_name = 'Australia'
+ 22            AND t.calendar_year BETWEEN 1998 AND 2001
+ 23          GROUP BY t.calendar_year, p.prod_id, p.prod_name
+ 24      ) product_year_totals
+ 25  )
+ 26  WHERE quantity_rank = 1
+ 27  ORDER BY calendar_year, prod_id;
+
+CALENDAR_YEAR    PROD_ID PROD_NAME                                          TOTAL_QUANTITY
+------------- ---------- -------------------------------------------------- --------------
+         1998         40 O/S Documentation Set - English                               325
+         1999         37 Envoy External 8X CD-ROM                                      349
+         2000         31 1.44MB External 3.5" Diskette                                 325
+         2001         48 Keyboard Wrist Rest                                           346
+
+4 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q3 INDEPENDENT YEARLY-MAXIMUM CROSS-CHECK =====
+===== Q3 INDEPENDENT YEARLY-MAXIMUM CROSS-CHECK =====
+SQL> WITH product_year_totals AS (
+  2      SELECT t.calendar_year,
+  3             p.prod_id,
+  4             p.prod_name,
+  5             SUM(s.quantity_sold) AS total_quantity
+  6      FROM sh.sales s
+  7      JOIN sh.times t ON t.time_id = s.time_id
+  8      JOIN sh.products p ON p.prod_id = s.prod_id
+  9      JOIN sh.customers cu ON cu.cust_id = s.cust_id
+ 10      JOIN sh.countries c ON c.country_id = cu.country_id
+ 11      WHERE c.country_name = 'Australia'
+ 12        AND t.calendar_year IN (1998, 1999, 2000, 2001)
+ 13      GROUP BY t.calendar_year, p.prod_id, p.prod_name
+ 14  ),
+ 15  yearly_maximum AS (
+ 16      SELECT calendar_year,
+ 17             MAX(total_quantity) AS maximum_quantity
+ 18      FROM product_year_totals
+ 19      GROUP BY calendar_year
+ 20  )
+ 21  SELECT ym.calendar_year,
+ 22         ym.maximum_quantity,
+ 23         COUNT(*) AS products_tied_at_maximum
+ 24  FROM yearly_maximum ym
+ 25  JOIN product_year_totals pyt
+ 26      ON pyt.calendar_year = ym.calendar_year
+ 27     AND pyt.total_quantity = ym.maximum_quantity
+ 28  GROUP BY ym.calendar_year, ym.maximum_quantity
+ 29  ORDER BY ym.calendar_year;
+
+CALENDAR_YEAR MAXIMUM_QUANTITY PRODUCTS_TIED_AT_MAXIMUM
+------------- ---------------- ------------------------
+         1998              325                        1
+         1999              349                        1
+         2000              325                        1
+         2001              346                        1
+
+4 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q3 YEAR COVERAGE CHECK =====
+===== Q3 YEAR COVERAGE CHECK =====
+SQL> SELECT t.calendar_year,
+  2         COUNT(*) AS australia_sales_rows
+  3  FROM sh.sales s
+  4  JOIN sh.times t ON t.time_id = s.time_id
+  5  JOIN sh.customers cu ON cu.cust_id = s.cust_id
+  6  JOIN sh.countries c ON c.country_id = cu.country_id
+  7  WHERE c.country_name = 'Australia'
+  8    AND t.calendar_year BETWEEN 1998 AND 2001
+  9  GROUP BY t.calendar_year
+ 10  ORDER BY t.calendar_year;
+
+CALENDAR_YEAR AUSTRALIA_SALES_ROWS
+------------- --------------------
+         1998                 6457
+         1999                 8993
+         2000                 8261
+         2001                 9974
+
+4 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q3 VALIDATION COMPLETE =====
+===== Q3 VALIDATION COMPLETE =====
+SQL> SPOOL OFF

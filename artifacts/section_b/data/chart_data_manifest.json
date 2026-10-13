@@ -1,0 +1,45 @@
+{
+  "generated_at_pacific_auckland": "2026-10-14T11:28:58.853884+13:00",
+  "generated_at_utc": "2026-10-13T22:28:58.853349+00:00",
+  "inputs": {
+    "q6_full_period_promo_sales.csv": {
+      "category_count": 4,
+      "fields": [
+        "PROMO_CATEGORY",
+        "TOTAL_SALES"
+      ],
+      "row_count": 4,
+      "sha256": "b52e464d648d89decee2f5ec052d1fd56ba6167a424c010dde10fe2d9fc02829"
+    },
+    "q6_q1_promo_sales.csv": {
+      "category_count": 4,
+      "fields": [
+        "CALENDAR_YEAR",
+        "PROMO_CATEGORY",
+        "TOTAL_SALES"
+      ],
+      "period_max": "2001",
+      "period_min": "1998",
+      "row_count": 7,
+      "sha256": "e9d42d19df06e2c0cba7ef6483b249b9c9dc97bd97d4cd48ad2ae7e6e96b7779"
+    },
+    "q7_monthly_product_category_sales.csv": {
+      "category_count": 5,
+      "fields": [
+        "CALENDAR_MONTH_DESC",
+        "PROD_CATEGORY",
+        "TOTAL_SALES"
+      ],
+      "period_max": "2001-12",
+      "period_min": "1998-01",
+      "row_count": 240,
+      "sha256": "6c77da1ec114e51d15d4678492fd961d2089e31921cc5f81a7ef418301ac6710"
+    }
+  },
+  "outputs": [
+    "q6_historical_q1_promotion_sales.svg",
+    "q6_historical_q1_promotion_sales.png",
+    "q7_monthly_product_category_sales.svg",
+    "q7_monthly_product_category_sales.png"
+  ]
+}

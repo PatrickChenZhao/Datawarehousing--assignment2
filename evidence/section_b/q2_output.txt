@@ -1,0 +1,136 @@
+SQL>
+SQL> PROMPT ===== Q2 MATCHED PRODUCT TYPES =====
+===== Q2 MATCHED PRODUCT TYPES =====
+SQL> SELECT p.prod_id,
+  2         p.prod_name,
+  3         p.prod_desc,
+  4         p.prod_subcategory,
+  5         p.prod_category
+  6  FROM sh.products p
+  7  WHERE p.prod_subcategory = 'Recordable CDs'
+  8  ORDER BY p.prod_name, p.prod_id;
+
+   PROD_ID PROD_NAME
+---------- --------------------------------------------------
+PROD_DESC
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+PROD_SUBCATEGORY                                   PROD_CATEGORY
+-------------------------------------------------- --------------------------------------------------
+       113 CD-R Mini Discs
+CD-R Mini Discs with Jewel Case, 185MB, Pack of 5
+Recordable CDs                                     Software/Other
+
+       119 CD-R with Jewel Cases, pACK OF 12
+CD-R with Jewel Cases, 700MB/80 Minutes, Pack of 12
+Recordable CDs                                     Software/Other
+
+       117 CD-R, Professional Grade, Pack of 10
+CD-R, Professional Grade, Pack of 10
+Recordable CDs                                     Software/Other
+
+       116 CD-RW, High Speed Pack of 5
+CD-RW, High Speed 650MB/74 Minutes, Pack of 5
+Recordable CDs                                     Software/Other
+
+       115 CD-RW, High Speed, Pack of 10
+CD-RW, High Speed, Pack of 10
+Recordable CDs                                     Software/Other
+
+       114 Music CD-R
+Music CD-R with Spindle, 700MB, Pack of 30
+Recordable CDs                                     Software/Other
+
+       118 OraMusic CD-R, Pack of 10
+OraMusic CD-R, Pack of 10
+Recordable CDs                                     Software/Other
+
+
+7 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q2 ANSWER USING GROUP BY ROLLUP =====
+===== Q2 ANSWER USING GROUP BY ROLLUP =====
+SQL> WITH rollup_sales AS (
+  2      SELECT CASE
+  3                 WHEN GROUPING(c.country_region) = 1 THEN 'ALL REGIONS'
+  4                 ELSE c.country_region
+  5             END AS country_region,
+  6             CASE
+  7                 WHEN GROUPING(c.country_region) = 1
+  8                  AND GROUPING(c.country_name) = 1 THEN 'GRAND TOTAL'
+  9                 WHEN GROUPING(c.country_name) = 1 THEN 'REGION TOTAL'
+ 10                 ELSE c.country_name
+ 11             END AS country_name,
+ 12             ROUND(SUM(s.amount_sold)) AS rounded_sales,
+ 13             GROUPING_ID(c.country_region, c.country_name) AS group_level
+ 14      FROM sh.sales s
+ 15      JOIN sh.products p ON p.prod_id = s.prod_id
+ 16      JOIN sh.customers cu ON cu.cust_id = s.cust_id
+ 17      JOIN sh.countries c ON c.country_id = cu.country_id
+ 18      WHERE c.country_region = 'Europe'
+ 19        AND p.prod_subcategory = 'Recordable CDs'
+ 20      GROUP BY ROLLUP(c.country_region, c.country_name)
+ 21  )
+ 22  SELECT country_region AS COUNTRY_REGION,
+ 23         country_name AS COUNTRY_NAME,
+ 24         TO_CHAR(
+ 25             rounded_sales,
+ 26             'FM$999,999,999,999,990',
+ 27             'NLS_NUMERIC_CHARACTERS=''.,'''
+ 28         ) || '.xx' AS TOTAL_SALES
+ 29  FROM rollup_sales
+ 30  ORDER BY group_level, country_region, country_name;
+
+COUNTRY_REGION       COUNTRY_NAME                             TOTAL_SALES
+-------------------- ---------------------------------------- ------------------------
+Europe               Denmark                                  $34,251.xx
+Europe               France                                   $64,878.xx
+Europe               Germany                                  $157,477.xx
+Europe               Italy                                    $80,190.xx
+Europe               Poland                                   $24.xx
+Europe               Spain                                    $29,717.xx
+Europe               Turkey                                   $681.xx
+Europe               United Kingdom                           $110,375.xx
+Europe               REGION TOTAL                             $477,593.xx
+ALL REGIONS          GRAND TOTAL                              $477,593.xx
+
+10 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q2 ORDINARY-GROUP-BY CROSS-CHECK =====
+===== Q2 ORDINARY-GROUP-BY CROSS-CHECK =====
+SQL> WITH detail_totals AS (
+  2      SELECT c.country_name,
+  3             SUM(s.amount_sold) AS total_sales
+  4      FROM sh.sales s
+  5      JOIN sh.products p ON p.prod_id = s.prod_id
+  6      JOIN sh.customers cu ON cu.cust_id = s.cust_id
+  7      JOIN sh.countries c ON c.country_id = cu.country_id
+  8      WHERE c.country_region = 'Europe'
+  9        AND p.prod_subcategory = 'Recordable CDs'
+ 10      GROUP BY c.country_name
+ 11  )
+ 12  SELECT country_name,
+ 13         total_sales,
+ 14         ROUND(total_sales) AS rounded_sales,
+ 15         SUM(total_sales) OVER () AS grand_total_check
+ 16  FROM detail_totals
+ 17  ORDER BY country_name;
+
+COUNTRY_NAME                             TOTAL_SALES ROUNDED_SALES GRAND_TOTAL_CHECK
+---------------------------------------- ----------- ------------- -----------------
+Denmark                                     34250.87         34251          477592.9
+France                                      64878.01         64878          477592.9
+Germany                                    157476.51        157477          477592.9
+Italy                                       80190.25         80190          477592.9
+Poland                                         23.98            24          477592.9
+Spain                                       29716.63         29717          477592.9
+Turkey                                        681.28           681          477592.9
+United Kingdom                             110375.37        110375          477592.9
+
+8 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q2 VALIDATION COMPLETE =====
+===== Q2 VALIDATION COMPLETE =====
+SQL> SPOOL OFF

@@ -1,0 +1,65 @@
+SQL>
+SQL> PROMPT ===== DIRECT OR PUBLIC SELECT GRANTS ON REQUIRED SH OBJECTS =====
+===== DIRECT OR PUBLIC SELECT GRANTS ON REQUIRED SH OBJECTS =====
+SQL> SELECT grantee,
+  2         table_schema AS owner,
+  3         table_name,
+  4         privilege,
+  5         grantable
+  6  FROM all_tab_privs
+  7  WHERE table_schema = 'SH'
+  8    AND table_name IN (
+  9        'SALES',
+ 10        'PRODUCTS',
+ 11        'CUSTOMERS',
+ 12        'COUNTRIES',
+ 13        'TIMES',
+ 14        'CHANNELS',
+ 15        'PROMOTIONS'
+ 16    )
+ 17    AND grantee IN (USER, 'PUBLIC')
+ 18    AND privilege = 'SELECT'
+ 19  ORDER BY table_name,
+ 20           grantee;
+
+GRANTEE
+--------------------------------------------------------------------------------------------------------------------------------
+OWNER
+--------------------------------------------------------------------------------------------------------------------------------
+TABLE_NAME                                                                                                                       PRIVILEGE                                GRA
+-------------------------------------------------------------------------------------------------------------------------------- ---------------------------------------- ---
+GWC5419
+SH
+CHANNELS                                                                                                                         SELECT                                   NO
+
+GWC5419
+SH
+COUNTRIES                                                                                                                        SELECT                                   NO
+
+GWC5419
+SH
+CUSTOMERS                                                                                                                        SELECT                                   NO
+
+GWC5419
+SH
+PRODUCTS                                                                                                                         SELECT                                   NO
+
+GWC5419
+SH
+PROMOTIONS                                                                                                                       SELECT                                   NO
+
+GWC5419
+SH
+SALES                                                                                                                            SELECT                                   NO
+
+GWC5419
+SH
+TIMES                                                                                                                            SELECT                                   NO
+
+
+7 rows selected.
+
+SQL>
+SQL> PROMPT ===== SUPPLEMENTAL PREFLIGHT COMPLETE =====
+===== SUPPLEMENTAL PREFLIGHT COMPLETE =====
+SQL> SPOOL OFF

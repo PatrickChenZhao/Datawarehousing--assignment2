@@ -1,0 +1,709 @@
+SQL>
+SQL> PROMPT ===== BEGIN CLEAN FINAL RUN OF queriesDW.sql =====
+===== BEGIN CLEAN FINAL RUN OF queriesDW.sql =====
+SQL> @"/Users/chen/Downloads/AUT/Bigdata_warehousing/data_warehousing/datawarehousing- assignment/queriesDW.sql"
+SQL> -- COMP810 Data Warehousing Project 2026 - Section B
+SQL> -- Status: Q1-Q7 INDIVIDUALLY VERIFIED; CLEAN FINAL RUN PENDING
+SQL> -- Run the whole script with F5 / Run Script in the existing school Oracle
+SQL> -- connection. Do not submit this draft until the saved final run contains no
+SQL> -- unhandled ORA-, SP2-, PLS- or Warning marker.
+SQL>
+SQL> SET ECHO ON
+SQL> SET FEEDBACK ON
+SQL> SET HEADING ON
+SQL> SET PAGESIZE 500
+SQL> SET LINESIZE 240
+SQL> SET TAB OFF
+SQL> SET TRIMSPOOL ON
+SQL>
+SQL> PROMPT ===== Q1: TOP FIVE COUNTRIES BY SALES, 2000-2001 COMBINED =====
+===== Q1: TOP FIVE COUNTRIES BY SALES, 2000-2001 COMBINED =====
+SQL>
+SQL> WITH country_totals AS (
+  2      SELECT c.country_region,
+  3             c.country_name,
+  4             SUM(s.amount_sold) AS total_sales
+  5      FROM sh.sales s
+  6      JOIN sh.times t
+  7          ON t.time_id = s.time_id
+  8      JOIN sh.customers cu
+  9          ON cu.cust_id = s.cust_id
+ 10      JOIN sh.countries c
+ 11          ON c.country_id = cu.country_id
+ 12      WHERE t.calendar_year BETWEEN 2000 AND 2001
+ 13      GROUP BY c.country_region,
+ 14               c.country_name
+ 15  ),
+ 16  ranked_countries AS (
+ 17      SELECT country_region,
+ 18             country_name,
+ 19             total_sales,
+ 20             ROW_NUMBER() OVER (
+ 21                 ORDER BY total_sales DESC,
+ 22                          country_name ASC,
+ 23                          country_region ASC
+ 24             ) AS sales_rank
+ 25      FROM country_totals
+ 26  )
+ 27  SELECT country_region AS "Region",
+ 28         country_name AS "Country Name",
+ 29         TO_CHAR(
+ 30             ROUND(total_sales),
+ 31             'FM$999,999,999,999,990.00',
+ 32             'NLS_NUMERIC_CHARACTERS=''.,'''
+ 33         ) AS "Sales"
+ 34  FROM ranked_countries
+ 35  WHERE sales_rank <= 5
+ 36  ORDER BY sales_rank;
+
+Region               Country Name                             Sales
+-------------------- ---------------------------------------- ------------------------
+Americas             United States of America                 $28,181,852.00
+Europe               Germany                                  $4,880,282.00
+Asia                 Japan                                    $3,779,264.00
+Europe               United Kingdom                           $3,226,975.00
+Europe               Italy                                    $2,496,667.00
+
+5 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q2: EUROPEAN CD-R/CD-RW SALES WITH ROLLUP =====
+===== Q2: EUROPEAN CD-R/CD-RW SALES WITH ROLLUP =====
+SQL>
+SQL> WITH rollup_sales AS (
+  2      SELECT CASE
+  3                 WHEN GROUPING(c.country_region) = 1 THEN 'ALL REGIONS'
+  4                 ELSE c.country_region
+  5             END AS country_region,
+  6             CASE
+  7                 WHEN GROUPING(c.country_region) = 1
+  8                  AND GROUPING(c.country_name) = 1 THEN 'GRAND TOTAL'
+  9                 WHEN GROUPING(c.country_name) = 1 THEN 'REGION TOTAL'
+ 10                 ELSE c.country_name
+ 11             END AS country_name,
+ 12             ROUND(SUM(s.amount_sold)) AS rounded_sales,
+ 13             GROUPING_ID(c.country_region, c.country_name) AS group_level
+ 14      FROM sh.sales s
+ 15      JOIN sh.products p
+ 16          ON p.prod_id = s.prod_id
+ 17      JOIN sh.customers cu
+ 18          ON cu.cust_id = s.cust_id
+ 19      JOIN sh.countries c
+ 20          ON c.country_id = cu.country_id
+ 21      WHERE c.country_region = 'Europe'
+ 22        AND p.prod_subcategory = 'Recordable CDs'
+ 23      GROUP BY ROLLUP(c.country_region, c.country_name)
+ 24  )
+ 25  SELECT country_region AS COUNTRY_REGION,
+ 26         country_name AS COUNTRY_NAME,
+ 27         TO_CHAR(
+ 28             rounded_sales,
+ 29             'FM$999,999,999,999,990',
+ 30             'NLS_NUMERIC_CHARACTERS=''.,'''
+ 31         ) || '.xx' AS TOTAL_SALES
+ 32  FROM rollup_sales
+ 33  ORDER BY group_level,
+ 34           country_region,
+ 35           country_name;
+
+COUNTRY_REGION       COUNTRY_NAME                             TOTAL_SALES
+-------------------- ---------------------------------------- ------------------------
+Europe               Denmark                                  $34,251.xx
+Europe               France                                   $64,878.xx
+Europe               Germany                                  $157,477.xx
+Europe               Italy                                    $80,190.xx
+Europe               Poland                                   $24.xx
+Europe               Spain                                    $29,717.xx
+Europe               Turkey                                   $681.xx
+Europe               United Kingdom                           $110,375.xx
+Europe               REGION TOTAL                             $477,593.xx
+ALL REGIONS          GRAND TOTAL                              $477,593.xx
+
+10 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q3: TOP-QUANTITY PRODUCT IN AUSTRALIA BY YEAR =====
+===== Q3: TOP-QUANTITY PRODUCT IN AUSTRALIA BY YEAR =====
+SQL>
+SQL> SELECT calendar_year AS CALENDAR_YEAR,
+  2         prod_id AS PROD_ID,
+  3         prod_name AS PROD_NAME,
+  4         total_quantity AS TOTAL_QUANTITY
+  5  FROM (
+  6      SELECT product_year_totals.*,
+  7             DENSE_RANK() OVER (
+  8                 PARTITION BY calendar_year
+  9                 ORDER BY total_quantity DESC
+ 10             ) AS quantity_rank
+ 11      FROM (
+ 12          SELECT t.calendar_year,
+ 13                 p.prod_id,
+ 14                 p.prod_name,
+ 15                 SUM(s.quantity_sold) AS total_quantity
+ 16          FROM sh.sales s
+ 17          JOIN sh.times t
+ 18              ON t.time_id = s.time_id
+ 19          JOIN sh.products p
+ 20              ON p.prod_id = s.prod_id
+ 21          JOIN sh.customers cu
+ 22              ON cu.cust_id = s.cust_id
+ 23          JOIN sh.countries c
+ 24              ON c.country_id = cu.country_id
+ 25          WHERE c.country_name = 'Australia'
+ 26            AND t.calendar_year BETWEEN 1998 AND 2001
+ 27          GROUP BY t.calendar_year,
+ 28                   p.prod_id,
+ 29                   p.prod_name
+ 30      ) product_year_totals
+ 31  )
+ 32  WHERE quantity_rank = 1
+ 33  ORDER BY calendar_year,
+ 34           prod_id;
+
+CALENDAR_YEAR    PROD_ID PROD_NAME                                          TOTAL_QUANTITY
+------------- ---------- -------------------------------------------------- --------------
+         1998         40 O/S Documentation Set - English                               325
+         1999         37 Envoy External 8X CD-ROM                                      349
+         2000         31 1.44MB External 3.5" Diskette                                 325
+         2001         48 Keyboard Wrist Rest                                           346
+
+4 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q4: TOP THREE CHANNELS FOR QUALIFYING NON-EUROPEAN COUNTRIES =====
+===== Q4: TOP THREE CHANNELS FOR QUALIFYING NON-EUROPEAN COUNTRIES =====
+SQL>
+SQL> WITH eligible_countries AS (
+  2      SELECT c.country_id
+  3      FROM sh.sales s
+  4      JOIN sh.times t
+  5          ON t.time_id = s.time_id
+  6      JOIN sh.customers cu
+  7          ON cu.cust_id = s.cust_id
+  8      JOIN sh.countries c
+  9          ON c.country_id = cu.country_id
+ 10      WHERE t.calendar_year = 1999
+ 11        AND c.country_region <> 'Europe'
+ 12      GROUP BY c.country_id
+ 13      HAVING SUM(s.amount_sold) > 500000
+ 14  ),
+ 15  channel_totals AS (
+ 16      SELECT ch.channel_desc,
+ 17             SUM(s.quantity_sold) AS total_quantity
+ 18      FROM sh.sales s
+ 19      JOIN sh.times t
+ 20          ON t.time_id = s.time_id
+ 21      JOIN sh.channels ch
+ 22          ON ch.channel_id = s.channel_id
+ 23      JOIN sh.customers cu
+ 24          ON cu.cust_id = s.cust_id
+ 25      JOIN eligible_countries ec
+ 26          ON ec.country_id = cu.country_id
+ 27      WHERE t.calendar_year = 1999
+ 28      GROUP BY ch.channel_desc
+ 29  ),
+ 30  ranked_channels AS (
+ 31      SELECT channel_desc,
+ 32             total_quantity,
+ 33             ROW_NUMBER() OVER (
+ 34                 ORDER BY total_quantity DESC,
+ 35                          channel_desc ASC
+ 36             ) AS channel_rank
+ 37      FROM channel_totals
+ 38  )
+ 39  SELECT channel_desc AS CHANNEL_DESC,
+ 40         total_quantity AS TOTAL_QUANTITY
+ 41  FROM ranked_channels
+ 42  WHERE channel_rank <= 3
+ 43  ORDER BY channel_rank;
+
+CHANNEL_DESC         TOTAL_QUANTITY
+-------------------- --------------
+Direct Sales                 106698
+Partners                      52482
+Internet                      21486
+
+3 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q5: PROMOTION_ANALYSIS_MV =====
+===== Q5: PROMOTION_ANALYSIS_MV =====
+SQL>
+SQL> -- This block drops only the current user's materialized view of the exact
+SQL> -- required name. A same-named table or ordinary view is not dropped.
+SQL> DECLARE
+  2      mv_count PLS_INTEGER;
+  3  BEGIN
+  4      SELECT COUNT(*)
+  5      INTO mv_count
+  6      FROM user_mviews
+  7      WHERE mview_name = 'PROMOTION_ANALYSIS_MV';
+  8
+  9      IF mv_count = 1 THEN
+ 10          EXECUTE IMMEDIATE
+ 11              'DROP MATERIALIZED VIEW Promotion_Analysis_mv';
+ 12      END IF;
+ 13  END;
+ 14  /
+
+PL/SQL procedure successfully completed.
+
+SQL>
+SQL> CREATE MATERIALIZED VIEW Promotion_Analysis_mv
+  2  BUILD IMMEDIATE
+  3  REFRESH COMPLETE ON DEMAND
+  4  AS
+  5  SELECT t.calendar_month_desc AS CALENDAR_MONTH_DESC,
+  6         pr.promo_id AS PROMO_ID,
+  7         pr.promo_category AS PROMO_CATEGORY,
+  8         p.prod_name AS PROD_NAME,
+  9         p.prod_category AS PROD_CATEGORY,
+ 10         SUM(s.amount_sold) AS TOTAL_SALES
+ 11  FROM sh.sales s
+ 12  JOIN sh.times t
+ 13      ON t.time_id = s.time_id
+ 14  JOIN sh.promotions pr
+ 15      ON pr.promo_id = s.promo_id
+ 16  JOIN sh.products p
+ 17      ON p.prod_id = s.prod_id
+ 18  WHERE t.calendar_year BETWEEN 1998 AND 2001
+ 19  GROUP BY t.calendar_month_desc,
+ 20           pr.promo_id,
+ 21           pr.promo_category,
+ 22           p.prod_name,
+ 23           p.prod_category;
+
+Materialized view PROMOTION_ANALYSIS_MV created.
+
+SQL>
+SQL> -- A materialized view has no guaranteed display order. This separate query
+SQL> -- performs the complete sort first and then limits the result to ten rows.
+SQL> SELECT calendar_month_desc AS CALENDAR_MONTH_DESC,
+  2         promo_id AS PROMO_ID,
+  3         promo_category AS PROMO_CATEGORY,
+  4         prod_name AS PROD_NAME,
+  5         prod_category AS PROD_CATEGORY,
+  6         total_sales AS TOTAL_SALES
+  7  FROM (
+  8      SELECT calendar_month_desc,
+  9             promo_id,
+ 10             promo_category,
+ 11             prod_name,
+ 12             prod_category,
+ 13             total_sales
+ 14      FROM Promotion_Analysis_mv
+ 15      ORDER BY calendar_month_desc ASC,
+ 16               total_sales DESC,
+ 17               promo_id ASC,
+ 18               prod_name ASC
+ 19  )
+ 20  WHERE ROWNUM <= 10
+ 21  ORDER BY calendar_month_desc ASC,
+ 22           total_sales DESC,
+ 23           promo_id ASC,
+ 24           prod_name ASC;
+
+CALENDAR   PROMO_ID PROMO_CATEGORY                 PROD_NAME                                          PROD_CATEGORY                                      TOTAL_SALES
+-------- ---------- ------------------------------ -------------------------------------------------- -------------------------------------------------- -----------
+1998-01         999 NO PROMOTION                   Envoy Ambassador                                   Hardware                                             476206.96
+1998-01         999 NO PROMOTION                   Mini DV Camcorder with 3.5" Swivel LCD             Photo                                                250925.78
+1998-01         999 NO PROMOTION                   17" LCD w/built-in HDTV Tuner                      Peripherals and Accessories                          239773.24
+1998-01         999 NO PROMOTION                   Envoy 256MB - 40GB                                 Hardware                                             165643.35
+1998-01         999 NO PROMOTION                   18" Flat Panel Graphics Monitor                    Peripherals and Accessories                          162239.79
+1998-01         999 NO PROMOTION                   5MP Telephoto Digital Camera                       Photo                                                125575.64
+1998-01         999 NO PROMOTION                   Home Theatre Package with DVD-Audio/Video Play     Electronics                                            96274.7
+1998-01         999 NO PROMOTION                   Model NM500X High Yield Toner Cartridge            Peripherals and Accessories                           62171.12
+1998-01         999 NO PROMOTION                   Model A3827H Black Image Cartridge                 Peripherals and Accessories                           55919.67
+1998-01         999 NO PROMOTION                   Model CD13272 Tricolor Ink Cartridge               Peripherals and Accessories                           55520.68
+
+10 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q6: HISTORICAL FIRST-QUARTER PROMOTION SALES =====
+===== Q6: HISTORICAL FIRST-QUARTER PROMOTION SALES =====
+SQL>
+SQL> SELECT SUBSTR(calendar_month_desc, 1, 4) AS CALENDAR_YEAR,
+  2         NVL(promo_category, '(NULL)') AS PROMO_CATEGORY,
+  3         SUM(total_sales) AS TOTAL_SALES
+  4  FROM Promotion_Analysis_mv
+  5  WHERE SUBSTR(calendar_month_desc, 6, 2) IN ('01', '02', '03')
+  6  GROUP BY SUBSTR(calendar_month_desc, 1, 4),
+  7           NVL(promo_category, '(NULL)')
+  8  ORDER BY calendar_year,
+  9           total_sales DESC,
+ 10           promo_category;
+
+CALE PROMO_CATEGORY                 TOTAL_SALES
+---- ------------------------------ -----------
+1998 NO PROMOTION                    6427288.63
+1998 post                              53395.37
+1999 NO PROMOTION                    6093747.21
+2000 NO PROMOTION                    5944078.01
+2000 internet                          40811.48
+2001 NO PROMOTION                    6296711.63
+2001 TV                               250385.81
+
+7 rows selected.
+
+SQL>
+SQL> -- Supporting all-period comparison used to contextualise the Q1 chart.
+SQL> SELECT NVL(promo_category, '(NULL)') AS PROMO_CATEGORY,
+  2         SUM(total_sales) AS TOTAL_SALES
+  3  FROM Promotion_Analysis_mv
+  4  GROUP BY NVL(promo_category, '(NULL)')
+  5  ORDER BY total_sales DESC,
+  6           promo_category;
+
+PROMO_CATEGORY                 TOTAL_SALES
+------------------------------ -----------
+NO PROMOTION                    94504520.8
+internet                         2199380.9
+TV                              1224503.26
+post                             277426.26
+
+4 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q7: MONTHLY PRODUCT-CATEGORY SALES AGAINST TIME =====
+===== Q7: MONTHLY PRODUCT-CATEGORY SALES AGAINST TIME =====
+SQL>
+SQL> SELECT calendar_month_desc AS CALENDAR_MONTH_DESC,
+  2         NVL(prod_category, '(NULL)') AS PROD_CATEGORY,
+  3         SUM(total_sales) AS TOTAL_SALES
+  4  FROM Promotion_Analysis_mv
+  5  GROUP BY calendar_month_desc,
+  6           NVL(prod_category, '(NULL)')
+  7  ORDER BY calendar_month_desc,
+  8           prod_category;
+
+CALENDAR PROD_CATEGORY                                      TOTAL_SALES
+-------- -------------------------------------------------- -----------
+1998-01  Electronics                                          151647.15
+1998-01  Hardware                                             641850.31
+1998-01  Peripherals and Accessories                          792861.35
+1998-01  Photo                                                 387240.5
+1998-01  Software/Other                                       303821.18
+1998-02  Electronics                                          183034.89
+1998-02  Hardware                                             803488.51
+1998-02  Peripherals and Accessories                          748582.24
+1998-02  Photo                                                344849.91
+1998-02  Software/Other                                       292735.32
+1998-03  Electronics                                          131373.38
+1998-03  Hardware                                             480244.02
+1998-03  Peripherals and Accessories                          761496.79
+1998-03  Photo                                                246342.63
+1998-03  Software/Other                                       211115.82
+1998-04  Electronics                                          168357.86
+1998-04  Hardware                                             702028.45
+1998-04  Peripherals and Accessories                          734371.81
+1998-04  Photo                                                215646.61
+1998-04  Software/Other                                       155573.57
+1998-05  Electronics                                          133325.44
+1998-05  Hardware                                             512477.35
+1998-05  Peripherals and Accessories                          700558.24
+1998-05  Photo                                                252023.23
+1998-05  Software/Other                                       149902.97
+1998-06  Electronics                                          177123.91
+1998-06  Hardware                                             631697.27
+1998-06  Peripherals and Accessories                          672896.26
+1998-06  Photo                                                231569.45
+1998-06  Software/Other                                       156441.72
+1998-07  Electronics                                          157758.47
+1998-07  Hardware                                             335913.03
+1998-07  Peripherals and Accessories                          828740.67
+1998-07  Photo                                                346899.57
+1998-07  Software/Other                                       262970.54
+1998-08  Electronics                                          134657.65
+1998-08  Hardware                                             399344.54
+1998-08  Peripherals and Accessories                          855103.26
+1998-08  Photo                                                307878.74
+1998-08  Software/Other                                       275548.44
+1998-09  Electronics                                          151299.97
+1998-09  Hardware                                              687276.8
+1998-09  Peripherals and Accessories                          766477.69
+1998-09  Photo                                                241685.32
+1998-09  Software/Other                                       320268.41
+1998-10  Electronics                                          125862.05
+1998-10  Hardware                                             560918.17
+1998-10  Peripherals and Accessories                          881920.96
+1998-10  Photo                                                309042.57
+1998-10  Software/Other                                       358720.78
+1998-11  Electronics                                          124703.83
+1998-11  Hardware                                             732740.04
+1998-11  Peripherals and Accessories                          628841.98
+1998-11  Photo                                                   203656
+1998-11  Software/Other                                       269722.37
+1998-12  Electronics                                          136544.27
+1998-12  Hardware                                             357557.43
+1998-12  Peripherals and Accessories                          701406.12
+1998-12  Photo                                                327489.35
+1998-12  Software/Other                                       218287.79
+1999-01  Electronics                                          274962.79
+1999-01  Hardware                                             298206.78
+1999-01  Peripherals and Accessories                          683115.11
+1999-01  Photo                                                475777.31
+1999-01  Software/Other                                       345377.77
+1999-02  Electronics                                           226119.1
+1999-02  Hardware                                             448453.91
+1999-02  Peripherals and Accessories                          806445.61
+1999-02  Photo                                                435089.93
+1999-02  Software/Other                                       441520.71
+1999-03  Electronics                                          184516.92
+1999-03  Hardware                                             253502.47
+1999-03  Peripherals and Accessories                          592793.11
+1999-03  Photo                                                313105.26
+1999-03  Software/Other                                       314760.43
+1999-04  Electronics                                          193416.49
+1999-04  Hardware                                             339523.38
+1999-04  Peripherals and Accessories                           497049.5
+1999-04  Photo                                                239569.36
+1999-04  Software/Other                                       303713.93
+1999-05  Electronics                                          183612.16
+1999-05  Hardware                                             284001.88
+1999-05  Peripherals and Accessories                          597696.43
+1999-05  Photo                                                348646.64
+1999-05  Software/Other                                       297770.76
+1999-06  Electronics                                          199284.24
+1999-06  Hardware                                             374073.64
+1999-06  Peripherals and Accessories                          506526.77
+1999-06  Photo                                                241088.91
+1999-06  Software/Other                                       319497.54
+1999-07  Electronics                                          211739.51
+1999-07  Hardware                                             294983.98
+1999-07  Peripherals and Accessories                          697842.88
+1999-07  Photo                                                368471.08
+1999-07  Software/Other                                       318178.12
+1999-08  Electronics                                          212890.92
+1999-08  Hardware                                             310441.96
+1999-08  Peripherals and Accessories                          676300.19
+1999-08  Photo                                                361853.86
+1999-08  Software/Other                                       343429.68
+1999-09  Electronics                                          278909.46
+1999-09  Hardware                                             383694.64
+1999-09  Peripherals and Accessories                          715149.07
+1999-09  Photo                                                323241.56
+1999-09  Software/Other                                       329923.24
+1999-10  Electronics                                          189387.36
+1999-10  Hardware                                             268533.34
+1999-10  Peripherals and Accessories                          643055.57
+1999-10  Photo                                                315068.21
+1999-10  Software/Other                                          306571
+1999-11  Electronics                                          242006.18
+1999-11  Hardware                                             330654.22
+1999-11  Peripherals and Accessories                          588820.93
+1999-11  Photo                                                250285.72
+1999-11  Software/Other                                       307365.13
+1999-12  Electronics                                          519524.79
+1999-12  Hardware                                             195173.07
+1999-12  Peripherals and Accessories                          761441.94
+1999-12  Photo                                                212466.38
+1999-12  Software/Other                                       243324.83
+2000-01  Electronics                                          257285.89
+2000-01  Hardware                                             446329.13
+2000-01  Peripherals and Accessories                           684121.1
+2000-01  Photo                                                309725.39
+2000-01  Software/Other                                       308916.95
+2000-02  Electronics                                          242416.38
+2000-02  Hardware                                             506461.92
+2000-02  Peripherals and Accessories                          661569.69
+2000-02  Photo                                                395567.41
+2000-02  Software/Other                                       312603.57
+2000-03  Electronics                                          280010.94
+2000-03  Hardware                                              414819.8
+2000-03  Peripherals and Accessories                          486371.94
+2000-03  Photo                                                361335.02
+2000-03  Software/Other                                       317354.36
+2000-04  Electronics                                          318105.67
+2000-04  Hardware                                              329305.8
+2000-04  Peripherals and Accessories                           504676.6
+2000-04  Photo                                                359070.85
+2000-04  Software/Other                                        254351.2
+2000-05  Electronics                                          316824.18
+2000-05  Hardware                                             333581.13
+2000-05  Peripherals and Accessories                          534003.77
+2000-05  Photo                                                372487.41
+2000-05  Software/Other                                       317596.36
+2000-06  Electronics                                          315950.95
+2000-06  Hardware                                             326364.45
+2000-06  Peripherals and Accessories                          487842.19
+2000-06  Photo                                                351660.01
+2000-06  Software/Other                                       249910.35
+2000-07  Electronics                                          433823.77
+2000-07  Hardware                                                323381
+2000-07  Peripherals and Accessories                          498837.83
+2000-07  Photo                                                345301.24
+2000-07  Software/Other                                       295418.98
+2000-08  Electronics                                          477833.26
+2000-08  Hardware                                             338568.43
+2000-08  Peripherals and Accessories                          568034.46
+2000-08  Photo                                                411669.72
+2000-08  Software/Other                                       316149.92
+2000-09  Electronics                                          691448.94
+2000-09  Hardware                                              339535.9
+2000-09  Peripherals and Accessories                          511227.48
+2000-09  Photo                                                324898.29
+2000-09  Software/Other                                       245110.07
+2000-10  Electronics                                          652224.76
+2000-10  Hardware                                              245922.2
+2000-10  Peripherals and Accessories                          578759.25
+2000-10  Photo                                                 367233.3
+2000-10  Software/Other                                        320472.7
+2000-11  Electronics                                          661146.75
+2000-11  Hardware                                             300787.75
+2000-11  Peripherals and Accessories                          517420.49
+2000-11  Photo                                                 314749.1
+2000-11  Software/Other                                       266239.68
+2000-12  Electronics                                          553534.39
+2000-12  Hardware                                             431398.89
+2000-12  Peripherals and Accessories                          431921.42
+2000-12  Photo                                                415551.15
+2000-12  Software/Other                                       230285.09
+2001-01  Electronics                                          470827.01
+2001-01  Hardware                                             360373.12
+2001-01  Peripherals and Accessories                          561196.11
+2001-01  Photo                                                445417.51
+2001-01  Software/Other                                       275895.38
+2001-02  Electronics                                           357988.2
+2001-02  Hardware                                             389045.38
+2001-02  Peripherals and Accessories                          638449.09
+2001-02  Photo                                                422398.18
+2001-02  Software/Other                                       295243.69
+2001-03  Electronics                                           410472.5
+2001-03  Hardware                                             551924.95
+2001-03  Peripherals and Accessories                          575294.89
+2001-03  Photo                                                502890.69
+2001-03  Software/Other                                       289680.74
+2001-04  Electronics                                          412687.67
+2001-04  Hardware                                             530089.05
+2001-04  Peripherals and Accessories                             618645
+2001-04  Photo                                                545972.34
+2001-04  Software/Other                                       272563.17
+2001-05  Electronics                                          336667.65
+2001-05  Hardware                                             510854.66
+2001-05  Peripherals and Accessories                           589842.8
+2001-05  Photo                                                 459531.1
+2001-05  Software/Other                                        290125.9
+2001-06  Electronics                                          394832.58
+2001-06  Hardware                                             516115.88
+2001-06  Peripherals and Accessories                          577100.21
+2001-06  Photo                                                557972.07
+2001-06  Software/Other                                       309468.31
+2001-07  Electronics                                          330839.53
+2001-07  Hardware                                             509547.59
+2001-07  Peripherals and Accessories                          687529.39
+2001-07  Photo                                                543559.29
+2001-07  Software/Other                                       276369.55
+2001-08  Electronics                                          336955.55
+2001-08  Hardware                                             589085.93
+2001-08  Peripherals and Accessories                           673821.1
+2001-08  Photo                                                519460.52
+2001-08  Software/Other                                       309092.18
+2001-09  Electronics                                          349741.74
+2001-09  Hardware                                             552820.77
+2001-09  Peripherals and Accessories                          680710.55
+2001-09  Photo                                                544295.82
+2001-09  Software/Other                                       292169.12
+2001-10  Electronics                                          393724.73
+2001-10  Hardware                                             346370.41
+2001-10  Peripherals and Accessories                          806794.78
+2001-10  Photo                                                583827.04
+2001-10  Software/Other                                       318450.95
+2001-11  Electronics                                          405770.73
+2001-11  Hardware                                             441363.28
+2001-11  Peripherals and Accessories                          723924.77
+2001-11  Photo                                                598948.74
+2001-11  Software/Other                                       304679.98
+2001-12  Electronics                                          504343.06
+2001-12  Hardware                                             386778.99
+2001-12  Peripherals and Accessories                          726399.02
+2001-12  Photo                                                609355.61
+2001-12  Software/Other                                       320165.43
+
+240 rows selected.
+
+SQL>
+SQL> PROMPT ===== END OF SECTION B QUERIES =====
+===== END OF SECTION B QUERIES =====
+SQL>
+SQL> PROMPT ===== FINAL MATERIALIZED VIEW METADATA =====
+===== FINAL MATERIALIZED VIEW METADATA =====
+SQL> SELECT mview_name,
+  2         build_mode,
+  3         refresh_mode,
+  4         refresh_method,
+  5         staleness,
+  6         compile_state
+  7  FROM user_mviews
+  8  WHERE mview_name = 'PROMOTION_ANALYSIS_MV';
+
+MVIEW_NAME                                                                                                                       BUILD_MOD REFRESH_M REFRESH_ STALENESS           COMPILE_STATE
+-------------------------------------------------------------------------------------------------------------------------------- --------- --------- -------- ------------------- -------------------
+PROMOTION_ANALYSIS_MV                                                                                                            IMMEDIATE DEMAND    COMPLETE FRESH               VALID
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== FINAL MATERIALIZED VIEW COLUMN ORDER =====
+===== FINAL MATERIALIZED VIEW COLUMN ORDER =====
+SQL> SELECT column_id,
+  2         column_name,
+  3         data_type,
+  4         data_precision,
+  5         data_scale
+  6  FROM user_tab_columns
+  7  WHERE table_name = 'PROMOTION_ANALYSIS_MV'
+  8  ORDER BY column_id;
+
+ COLUMN_ID COLUMN_NAME
+---------- --------------------------------------------------------------------------------------------------------------------------------
+DATA_TYPE                                                                                                                        DATA_PRECISION DATA_SCALE
+-------------------------------------------------------------------------------------------------------------------------------- -------------- ----------
+         1 CALENDAR_MONTH_DESC
+VARCHAR2
+
+         2 PROMO_ID
+NUMBER                                                                                                                                        6          0
+
+         3 PROMO_CATEGORY
+VARCHAR2
+
+         4 PROD_NAME
+VARCHAR2
+
+         5 PROD_CATEGORY
+VARCHAR2
+
+         6 TOTAL_SALES
+NUMBER
+
+
+6 rows selected.
+
+SQL>
+SQL> PROMPT ===== FINAL MATERIALIZED VIEW CONTROL TOTAL =====
+===== FINAL MATERIALIZED VIEW CONTROL TOTAL =====
+SQL> SELECT source_totals.source_total_sales,
+  2         mv_totals.mv_total_sales,
+  3         source_totals.source_total_sales - mv_totals.mv_total_sales
+  4             AS total_sales_difference
+  5  FROM (
+  6      SELECT SUM(s.amount_sold) AS source_total_sales
+  7      FROM sh.sales s
+  8      JOIN sh.times t ON t.time_id = s.time_id
+  9      WHERE t.calendar_year BETWEEN 1998 AND 2001
+ 10  ) source_totals
+ 11  CROSS JOIN (
+ 12      SELECT SUM(total_sales) AS mv_total_sales
+ 13      FROM Promotion_Analysis_mv
+ 14  ) mv_totals;
+
+SOURCE_TOTAL_SALES MV_TOTAL_SALES TOTAL_SALES_DIFFERENCE
+------------------ -------------- ----------------------
+        98205831.2     98205831.2                      0
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== FINAL RUN COMPLETE =====
+===== FINAL RUN COMPLETE =====
+SQL> SPOOL OFF

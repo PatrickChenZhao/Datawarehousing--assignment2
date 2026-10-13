@@ -1,0 +1,65 @@
+COMP810 Section B static check
+Date: 14 October 2026 (Pacific/Auckland)
+
+Scope
+-----
+This records local source-code checks plus validation of the real Oracle CSV
+exports and generated chart files. Oracle execution claims remain supported by
+their separate saved F5 logs; the consolidated final run is still pending.
+
+Files checked
+-------------
+- queriesDW.sql
+- oracle_preflight.sql
+- oracle_preflight_direct_grants.sql
+- oracle_section_b_q1_validation.sql through q5_validation.sql
+- oracle_section_b_chart_extract.sql
+- oracle_section_b_final_validation.sql
+- artifacts/section_b/build_charts.py
+
+Results
+-------
+- PASS: queriesDW.sql contains exactly one labelled section for each Q1-Q7.
+- PASS: all checked Section B SQL files have balanced ordinary parentheses.
+- PASS: no checked Section B SQL file contains SELECT *.
+- PASS: no checked Section B SQL file contains INSERT, UPDATE, DELETE,
+  TRUNCATE, DROP or ALTER targeting sh.*.
+- PASS: Q2 contains GROUP BY ROLLUP and explicit GROUPING/GROUPING_ID handling.
+- PASS: after real product discovery, Q2 uses the exact `Recordable CDs`
+  subcategory and no longer uses the false-positive `CD-R` text regex.
+- PASS: Q3 contains a nested aggregation and DENSE_RANK tie handling.
+- PASS: Q5's first-ten query places the row limit outside the fully ordered
+  inner query.
+- PASS: the Q5 definition exposes the assignment's six columns in this order:
+  CALENDAR_MONTH_DESC, PROMO_ID, PROMO_CATEGORY, PROD_NAME, PROD_CATEGORY,
+  TOTAL_SALES.
+- PASS: the chart builder passes Python compilation with the bundled runtime.
+- PASS: the builder rejected the first malformed-header export before creating
+  a chart; the corrected Oracle export then passed strict field validation.
+- PASS: the three real CSV inputs contain 7, 4 and 240 data rows respectively,
+  with unique expected grains and no SQL/error text.
+- PASS: the Q7 export covers exactly 48 months by five product categories from
+  1998-01 through 2001-12.
+- PASS: the manifest SHA-256 hashes match all three current CSV files.
+- PASS: macOS sips produced both PNGs at 1600 x 900 without changing the SVG
+  canvas aspect ratio.
+- PASS: both PNGs were visually checked for complete titles, axes, units,
+  periods, legends, colour distinction, clipping and overlap.
+
+Final-run review
+----------------
+- PASS: the 709-line consolidated F5 log contains all Q1-Q7 outputs and the
+  `FINAL RUN COMPLETE` marker.
+- PASS: the final MV is FRESH and VALID, has the required six-column order and
+  reconciles to the source with a zero total-sales difference.
+- PASS: the only error-marker scan match is an explanatory script comment that
+  names the strings being checked; no Oracle or SQL*Plus error is present.
+
+Final synchronization
+---------------------
+- PASS: the post-final-run extraction retained 7, 4 and 240 data rows with the
+  expected fields and unique grains.
+- PASS: its three SHA-256 hashes exactly match the earlier verified exports.
+- PASS: the manifest was regenerated at 2026-10-14 11:28:58 NZDT from those
+  final exports.
+- PASS: both 1600 x 900 PNGs were rebuilt and passed repeat visual QA.

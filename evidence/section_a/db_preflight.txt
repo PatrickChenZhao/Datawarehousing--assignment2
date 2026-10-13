@@ -1,0 +1,92 @@
+SQL>
+SQL> PROMPT ===== CURRENT USER =====
+===== CURRENT USER =====
+SQL> SELECT USER AS current_user
+  2  FROM dual;
+
+CURRENT_USER
+--------------------------------------------------------------------------------------------------------------------------------
+GWC5419
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== ORACLE VERSION =====
+===== ORACLE VERSION =====
+SQL> SELECT banner
+  2  FROM v$version
+  3  WHERE banner LIKE 'Oracle Database%';
+
+BANNER
+--------------------------------------------------------------------------------
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== EXISTING PF_ TABLES, VIEWS AND MATERIALIZED VIEWS =====
+===== EXISTING PF_ TABLES, VIEWS AND MATERIALIZED VIEWS =====
+SQL> SELECT object_type, object_name
+  2  FROM (
+  3      SELECT 'TABLE' AS object_type, table_name AS object_name
+  4      FROM user_tables
+  5      WHERE table_name LIKE 'PF\_%' ESCAPE '\'
+  6      UNION ALL
+  7      SELECT 'VIEW' AS object_type, view_name AS object_name
+  8      FROM user_views
+  9      WHERE view_name LIKE 'PF\_%' ESCAPE '\'
+ 10      UNION ALL
+ 11      SELECT 'MATERIALIZED VIEW' AS object_type, mview_name AS object_name
+ 12      FROM user_mviews
+ 13      WHERE mview_name LIKE 'PF\_%' ESCAPE '\'
+ 14  )
+ 15  ORDER BY object_type, object_name;
+
+0 rows selected.
+
+SQL>
+SQL> PROMPT ===== EFFECTIVE SESSION PRIVILEGES RELATED TO TABLE CREATION =====
+===== EFFECTIVE SESSION PRIVILEGES RELATED TO TABLE CREATION =====
+SQL> SELECT privilege
+  2  FROM session_privs
+  3  WHERE privilege IN (
+  4      'CREATE TABLE',
+  5      'CREATE ANY TABLE',
+  6      'ALTER ANY TABLE',
+  7      'DROP ANY TABLE',
+  8      'UNLIMITED TABLESPACE'
+  9  )
+ 10  ORDER BY privilege;
+
+PRIVILEGE
+----------------------------------------
+CREATE TABLE
+UNLIMITED TABLESPACE
+
+2 rows selected.
+
+SQL>
+SQL> PROMPT ===== DIRECTLY GRANTED SYSTEM PRIVILEGES RELATED TO TABLE CREATION =====
+===== DIRECTLY GRANTED SYSTEM PRIVILEGES RELATED TO TABLE CREATION =====
+SQL> SELECT privilege, admin_option
+  2  FROM user_sys_privs
+  3  WHERE privilege IN (
+  4      'CREATE TABLE',
+  5      'CREATE ANY TABLE',
+  6      'ALTER ANY TABLE',
+  7      'DROP ANY TABLE',
+  8      'UNLIMITED TABLESPACE'
+  9  )
+ 10  ORDER BY privilege;
+
+PRIVILEGE                                ADM
+---------------------------------------- ---
+CREATE TABLE                             NO
+UNLIMITED TABLESPACE                     NO
+
+2 rows selected.
+
+SQL>
+SQL> PROMPT ===== PREFLIGHT COMPLETE =====
+===== PREFLIGHT COMPLETE =====
+SQL> SPOOL OFF

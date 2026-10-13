@@ -1,0 +1,123 @@
+SQL>
+SQL> PROMPT ===== Q1 ANSWER =====
+===== Q1 ANSWER =====
+SQL> WITH country_totals AS (
+  2      SELECT c.country_region,
+  3             c.country_name,
+  4             SUM(s.amount_sold) AS total_sales
+  5      FROM sh.sales s
+  6      JOIN sh.times t ON t.time_id = s.time_id
+  7      JOIN sh.customers cu ON cu.cust_id = s.cust_id
+  8      JOIN sh.countries c ON c.country_id = cu.country_id
+  9      WHERE t.calendar_year BETWEEN 2000 AND 2001
+ 10      GROUP BY c.country_region, c.country_name
+ 11  ),
+ 12  ranked_countries AS (
+ 13      SELECT country_region,
+ 14             country_name,
+ 15             total_sales,
+ 16             ROW_NUMBER() OVER (
+ 17                 ORDER BY total_sales DESC,
+ 18                          country_name ASC,
+ 19                          country_region ASC
+ 20             ) AS sales_rank
+ 21      FROM country_totals
+ 22  )
+ 23  SELECT country_region AS "Region",
+ 24         country_name AS "Country Name",
+ 25         TO_CHAR(
+ 26             ROUND(total_sales),
+ 27             'FM$999,999,999,999,990.00',
+ 28             'NLS_NUMERIC_CHARACTERS=''.,'''
+ 29         ) AS "Sales"
+ 30  FROM ranked_countries
+ 31  WHERE sales_rank <= 5
+ 32  ORDER BY sales_rank;
+
+Region               Country Name                             Sales
+-------------------- ---------------------------------------- ------------------------
+Americas             United States of America                 $28,181,852.00
+Europe               Germany                                  $4,880,282.00
+Asia                 Japan                                    $3,779,264.00
+Europe               United Kingdom                           $3,226,975.00
+Europe               Italy                                    $2,496,667.00
+
+5 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q1 INDEPENDENT RAW-NUMBER CROSS-CHECK =====
+===== Q1 INDEPENDENT RAW-NUMBER CROSS-CHECK =====
+SQL> WITH country_totals AS (
+  2      SELECT c.country_region,
+  3             c.country_name,
+  4             SUM(s.amount_sold) AS total_sales
+  5      FROM sh.sales s
+  6      JOIN sh.times t ON t.time_id = s.time_id
+  7      JOIN sh.customers cu ON cu.cust_id = s.cust_id
+  8      JOIN sh.countries c ON c.country_id = cu.country_id
+  9      WHERE t.calendar_year IN (2000, 2001)
+ 10      GROUP BY c.country_region, c.country_name
+ 11  )
+ 12  SELECT sales_rank,
+ 13         country_region,
+ 14         country_name,
+ 15         total_sales,
+ 16         ROUND(total_sales) AS rounded_sales
+ 17  FROM (
+ 18      SELECT country_totals.*,
+ 19             ROW_NUMBER() OVER (
+ 20                 ORDER BY total_sales DESC,
+ 21                          country_name ASC,
+ 22                          country_region ASC
+ 23             ) AS sales_rank
+ 24      FROM country_totals
+ 25  )
+ 26  WHERE sales_rank <= 5
+ 27  ORDER BY sales_rank;
+
+SALES_RANK COUNTRY_REGION       COUNTRY_NAME                             TOTAL_SALES ROUNDED_SALES
+---------- -------------------- ---------------------------------------- ----------- -------------
+         1 Americas             United States of America                  28181851.8      28181852
+         2 Europe               Germany                                   4880281.64       4880282
+         3 Asia                 Japan                                     3779264.25       3779264
+         4 Europe               United Kingdom                            3226974.91       3226975
+         5 Europe               Italy                                     2496666.65       2496667
+
+5 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q1 RETURNED ROW COUNT CHECK =====
+===== Q1 RETURNED ROW COUNT CHECK =====
+SQL> WITH country_totals AS (
+  2      SELECT c.country_region,
+  3             c.country_name,
+  4             SUM(s.amount_sold) AS total_sales
+  5      FROM sh.sales s
+  6      JOIN sh.times t ON t.time_id = s.time_id
+  7      JOIN sh.customers cu ON cu.cust_id = s.cust_id
+  8      JOIN sh.countries c ON c.country_id = cu.country_id
+  9      WHERE t.calendar_year BETWEEN 2000 AND 2001
+ 10      GROUP BY c.country_region, c.country_name
+ 11  ),
+ 12  ranked_countries AS (
+ 13      SELECT ROW_NUMBER() OVER (
+ 14                 ORDER BY total_sales DESC,
+ 15                          country_name ASC,
+ 16                          country_region ASC
+ 17             ) AS sales_rank
+ 18      FROM country_totals
+ 19  )
+ 20  SELECT COUNT(*) AS expected_five_rows
+ 21  FROM ranked_countries
+ 22  WHERE sales_rank <= 5;
+
+EXPECTED_FIVE_ROWS
+------------------
+                 5
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== Q1 VALIDATION COMPLETE =====
+===== Q1 VALIDATION COMPLETE =====
+SQL> SPOOL OFF

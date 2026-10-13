@@ -1,0 +1,33 @@
+COMP810 SECTION A STATIC CONSISTENCY CHECK
+Date: 14 October 2026
+
+Scope:
+- section_a_design_spec.md
+- createDW.sql
+- artifacts/section_a/phonefix_dw_erd.drawio
+- artifacts/section_a/phonefix_dw_erd.svg
+- artifacts/section_a/phonefix_dw_erd.png
+
+Results:
+- Draw.io XML well-formed: PASS
+- SVG XML well-formed: PASS
+- Expected table count: 5
+- DDL table count: 5
+- Explicit constraint count: 27
+- Foreign key count: 4
+- Longest constraint identifier: PF_TXN_SRC_LINE_UK (18 characters)
+- No INSERT statements: PASS
+- No checked MySQL/PostgreSQL/SQL Server syntax markers: PASS
+- Column names, datatypes and nullability match the confirmed specification: PASS
+- All foreign key datatypes match their referenced keys: PASS
+- All specified columns appear in the editable and exported ERD sources: PASS
+- PNG dimensions: 2200 x 1450
+- PNG visual inspection for clipping, overlap, legibility, grain note and 1:N relationships: PASS
+
+Overall static check: PASS
+
+Important limitation:
+This is a local static and visual check only. It is not evidence that Oracle executed
+the DDL successfully. Oracle preflight, create-script output, data-dictionary output
+and DESC output remain pending.
+

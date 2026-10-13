@@ -1,0 +1,111 @@
+SQL>
+SQL> PROMPT ===== Q4 ELIGIBLE COUNTRIES =====
+===== Q4 ELIGIBLE COUNTRIES =====
+SQL> SELECT c.country_id,
+  2         c.country_region,
+  3         c.country_name,
+  4         SUM(s.amount_sold) AS country_total_sales
+  5  FROM sh.sales s
+  6  JOIN sh.times t ON t.time_id = s.time_id
+  7  JOIN sh.customers cu ON cu.cust_id = s.cust_id
+  8  JOIN sh.countries c ON c.country_id = cu.country_id
+  9  WHERE t.calendar_year = 1999
+ 10    AND c.country_region <> 'Europe'
+ 11  GROUP BY c.country_id, c.country_region, c.country_name
+ 12  HAVING SUM(s.amount_sold) > 500000
+ 13  ORDER BY country_total_sales DESC, c.country_name;
+
+COUNTRY_ID COUNTRY_REGION       COUNTRY_NAME                             COUNTRY_TOTAL_SALES
+---------- -------------------- ---------------------------------------- -------------------
+     52790 Americas             United States of America                          11856749.2
+     52782 Asia                 Japan                                             1724980.36
+     52774 Oceania              Australia                                          856929.35
+     52769 Asia                 Singapore                                          668466.67
+     52772 Americas             Canada                                             597684.83
+
+5 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q4 ANSWER =====
+===== Q4 ANSWER =====
+SQL> WITH eligible_countries AS (
+  2      SELECT c.country_id
+  3      FROM sh.sales s
+  4      JOIN sh.times t ON t.time_id = s.time_id
+  5      JOIN sh.customers cu ON cu.cust_id = s.cust_id
+  6      JOIN sh.countries c ON c.country_id = cu.country_id
+  7      WHERE t.calendar_year = 1999
+  8        AND c.country_region <> 'Europe'
+  9      GROUP BY c.country_id
+ 10      HAVING SUM(s.amount_sold) > 500000
+ 11  ),
+ 12  channel_totals AS (
+ 13      SELECT ch.channel_desc,
+ 14             SUM(s.quantity_sold) AS total_quantity
+ 15      FROM sh.sales s
+ 16      JOIN sh.times t ON t.time_id = s.time_id
+ 17      JOIN sh.channels ch ON ch.channel_id = s.channel_id
+ 18      JOIN sh.customers cu ON cu.cust_id = s.cust_id
+ 19      JOIN eligible_countries ec ON ec.country_id = cu.country_id
+ 20      WHERE t.calendar_year = 1999
+ 21      GROUP BY ch.channel_desc
+ 22  ),
+ 23  ranked_channels AS (
+ 24      SELECT channel_desc,
+ 25             total_quantity,
+ 26             ROW_NUMBER() OVER (
+ 27                 ORDER BY total_quantity DESC, channel_desc ASC
+ 28             ) AS channel_rank
+ 29      FROM channel_totals
+ 30  )
+ 31  SELECT channel_desc AS CHANNEL_DESC,
+ 32         total_quantity AS TOTAL_QUANTITY
+ 33  FROM ranked_channels
+ 34  WHERE channel_rank <= 3
+ 35  ORDER BY channel_rank;
+
+CHANNEL_DESC         TOTAL_QUANTITY
+-------------------- --------------
+Direct Sales                 106698
+Partners                      52482
+Internet                      21486
+
+3 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q4 ALL-CHANNEL RAW-NUMBER CROSS-CHECK =====
+===== Q4 ALL-CHANNEL RAW-NUMBER CROSS-CHECK =====
+SQL> WITH eligible_countries AS (
+  2      SELECT c.country_id
+  3      FROM sh.sales s
+  4      JOIN sh.times t ON t.time_id = s.time_id
+  5      JOIN sh.customers cu ON cu.cust_id = s.cust_id
+  6      JOIN sh.countries c ON c.country_id = cu.country_id
+  7      WHERE t.calendar_year = 1999
+  8        AND c.country_region <> 'Europe'
+  9      GROUP BY c.country_id
+ 10      HAVING SUM(s.amount_sold) > 500000
+ 11  )
+ 12  SELECT ch.channel_desc,
+ 13         SUM(s.quantity_sold) AS total_quantity
+ 14  FROM sh.sales s
+ 15  JOIN sh.times t ON t.time_id = s.time_id
+ 16  JOIN sh.channels ch ON ch.channel_id = s.channel_id
+ 17  JOIN sh.customers cu ON cu.cust_id = s.cust_id
+ 18  JOIN eligible_countries ec ON ec.country_id = cu.country_id
+ 19  WHERE t.calendar_year = 1999
+ 20  GROUP BY ch.channel_desc
+ 21  ORDER BY total_quantity DESC, ch.channel_desc ASC;
+
+CHANNEL_DESC         TOTAL_QUANTITY
+-------------------- --------------
+Direct Sales                 106698
+Partners                      52482
+Internet                      21486
+
+3 rows selected.
+
+SQL>
+SQL> PROMPT ===== Q4 VALIDATION COMPLETE =====
+===== Q4 VALIDATION COMPLETE =====
+SQL> SPOOL OFF

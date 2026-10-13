@@ -1,0 +1,940 @@
+SQL>
+SQL> PROMPT ===== EXPECTED TABLE PRESENCE =====
+===== EXPECTED TABLE PRESENCE =====
+SQL> WITH expected_tables AS (
+  2      SELECT 'PF_DATE_DIM' AS table_name FROM dual
+  3      UNION ALL SELECT 'PF_STORE_DIM' FROM dual
+  4      UNION ALL SELECT 'PF_CUSTOMER_DIM' FROM dual
+  5      UNION ALL SELECT 'PF_PRODUCT_DIM' FROM dual
+  6      UNION ALL SELECT 'PF_TRANSACTION_FACT' FROM dual
+  7  )
+  8  SELECT e.table_name,
+  9         CASE WHEN u.table_name IS NULL THEN 'MISSING' ELSE 'PRESENT' END AS status
+ 10  FROM expected_tables e
+ 11  LEFT JOIN user_tables u
+ 12      ON u.table_name = e.table_name
+ 13  ORDER BY e.table_name;
+
+TABLE_NAME          STATUS
+------------------- -------
+PF_CUSTOMER_DIM     PRESENT
+PF_DATE_DIM         PRESENT
+PF_PRODUCT_DIM      PRESENT
+PF_STORE_DIM        PRESENT
+PF_TRANSACTION_FACT PRESENT
+
+5 rows selected.
+
+SQL>
+SQL> PROMPT ===== EXPECTED TABLE COUNT =====
+===== EXPECTED TABLE COUNT =====
+SQL> SELECT COUNT(*) AS expected_table_count
+  2  FROM user_tables
+  3  WHERE table_name IN (
+  4      'PF_DATE_DIM',
+  5      'PF_STORE_DIM',
+  6      'PF_CUSTOMER_DIM',
+  7      'PF_PRODUCT_DIM',
+  8      'PF_TRANSACTION_FACT'
+  9  );
+
+EXPECTED_TABLE_COUNT
+--------------------
+                   5
+
+1 row selected.
+
+SQL>
+SQL> PROMPT ===== COLUMN DEFINITIONS =====
+===== COLUMN DEFINITIONS =====
+SQL> SELECT table_name,
+  2         column_id,
+  3         column_name,
+  4         data_type,
+  5         data_length,
+  6         data_precision,
+  7         data_scale,
+  8         nullable
+  9  FROM user_tab_columns
+ 10  WHERE table_name IN (
+ 11      'PF_DATE_DIM',
+ 12      'PF_STORE_DIM',
+ 13      'PF_CUSTOMER_DIM',
+ 14      'PF_PRODUCT_DIM',
+ 15      'PF_TRANSACTION_FACT'
+ 16  )
+ 17  ORDER BY table_name, column_id;
+
+TABLE_NAME                                                                                                                        COLUMN_ID
+-------------------------------------------------------------------------------------------------------------------------------- ----------
+COLUMN_NAME
+--------------------------------------------------------------------------------------------------------------------------------
+DATA_TYPE                                                                                                                        DATA_LENGTH DATA_PRECISION DATA_SCALE N
+-------------------------------------------------------------------------------------------------------------------------------- ----------- -------------- ---------- -
+PF_CUSTOMER_DIM                                                                                                                           1
+CUSTOMER_KEY
+NUMBER                                                                                                                                    22             10          0 N
+
+PF_CUSTOMER_DIM                                                                                                                           2
+CUSTOMER_ID
+VARCHAR2                                                                                                                                  30                           N
+
+PF_CUSTOMER_DIM                                                                                                                           3
+CUSTOMER_NAME
+VARCHAR2                                                                                                                                 120                           N
+
+PF_CUSTOMER_DIM                                                                                                                           4
+ADDRESS_LINE
+VARCHAR2                                                                                                                                 200                           Y
+
+PF_CUSTOMER_DIM                                                                                                                           5
+SUBURB
+VARCHAR2                                                                                                                                  80                           Y
+
+PF_CUSTOMER_DIM                                                                                                                           6
+CITY
+VARCHAR2                                                                                                                                  80                           Y
+
+PF_CUSTOMER_DIM                                                                                                                           7
+DATE_OF_BIRTH
+DATE                                                                                                                                       7                           Y
+
+PF_CUSTOMER_DIM                                                                                                                           8
+INCOME_RANGE
+VARCHAR2                                                                                                                                  40                           Y
+
+PF_CUSTOMER_DIM                                                                                                                           9
+OCCUPATION
+VARCHAR2                                                                                                                                 100                           Y
+
+PF_DATE_DIM                                                                                                                               1
+DATE_KEY
+NUMBER                                                                                                                                    22              8          0 N
+
+PF_DATE_DIM                                                                                                                               2
+FULL_DATE
+DATE                                                                                                                                       7                           N
+
+PF_DATE_DIM                                                                                                                               3
+DAY_OF_MONTH
+NUMBER                                                                                                                                    22              2          0 N
+
+PF_DATE_DIM                                                                                                                               4
+DAY_NAME
+VARCHAR2                                                                                                                                   9                           N
+
+PF_DATE_DIM                                                                                                                               5
+WEEK_OF_YEAR
+NUMBER                                                                                                                                    22              2          0 N
+
+PF_DATE_DIM                                                                                                                               6
+MONTH_NUMBER
+NUMBER                                                                                                                                    22              2          0 N
+
+PF_DATE_DIM                                                                                                                               7
+MONTH_NAME
+VARCHAR2                                                                                                                                   9                           N
+
+PF_DATE_DIM                                                                                                                               8
+QUARTER_NUMBER
+NUMBER                                                                                                                                    22              1          0 N
+
+PF_DATE_DIM                                                                                                                               9
+CALENDAR_YEAR
+NUMBER                                                                                                                                    22              4          0 N
+
+PF_DATE_DIM                                                                                                                              10
+WEEKEND_FLAG
+CHAR                                                                                                                                       1                           N
+
+PF_PRODUCT_DIM                                                                                                                            1
+PRODUCT_KEY
+NUMBER                                                                                                                                    22             10          0 N
+
+PF_PRODUCT_DIM                                                                                                                            2
+PRODUCT_ID
+VARCHAR2                                                                                                                                  30                           N
+
+PF_PRODUCT_DIM                                                                                                                            3
+PRODUCT_NAME
+VARCHAR2                                                                                                                                 120                           N
+
+PF_PRODUCT_DIM                                                                                                                            4
+PRODUCT_TYPE
+VARCHAR2                                                                                                                                  20                           N
+
+PF_PRODUCT_DIM                                                                                                                            5
+CATEGORY_NAME
+VARCHAR2                                                                                                                                  80                           N
+
+PF_PRODUCT_DIM                                                                                                                            6
+BRAND_NAME
+VARCHAR2                                                                                                                                  80                           Y
+
+PF_PRODUCT_DIM                                                                                                                            7
+MODEL_NAME
+VARCHAR2                                                                                                                                  80                           Y
+
+PF_PRODUCT_DIM                                                                                                                            8
+SUPPLIER_ID
+VARCHAR2                                                                                                                                  30                           Y
+
+PF_PRODUCT_DIM                                                                                                                            9
+SUPPLIER_NAME
+VARCHAR2                                                                                                                                 120                           Y
+
+PF_STORE_DIM                                                                                                                              1
+STORE_KEY
+NUMBER                                                                                                                                    22             10          0 N
+
+PF_STORE_DIM                                                                                                                              2
+STORE_ID
+VARCHAR2                                                                                                                                  20                           N
+
+PF_STORE_DIM                                                                                                                              3
+STORE_NAME
+VARCHAR2                                                                                                                                 100                           N
+
+PF_STORE_DIM                                                                                                                              4
+OWNER_NAME
+VARCHAR2                                                                                                                                 100                           N
+
+PF_STORE_DIM                                                                                                                              5
+ADDRESS_LINE
+VARCHAR2                                                                                                                                 200                           Y
+
+PF_STORE_DIM                                                                                                                              6
+SUBURB
+VARCHAR2                                                                                                                                  80                           Y
+
+PF_STORE_DIM                                                                                                                              7
+CITY
+VARCHAR2                                                                                                                                  80                           N
+
+PF_STORE_DIM                                                                                                                              8
+POSTCODE
+VARCHAR2                                                                                                                                  10                           Y
+
+PF_STORE_DIM                                                                                                                              9
+OPEN_DATE
+DATE                                                                                                                                       7                           Y
+
+PF_STORE_DIM                                                                                                                             10
+STORE_STATUS
+VARCHAR2                                                                                                                                  10                           N
+
+PF_TRANSACTION_FACT                                                                                                                       1
+TRANSACTION_KEY
+NUMBER                                                                                                                                    22             12          0 N
+
+PF_TRANSACTION_FACT                                                                                                                       2
+SOURCE_TRANSACTION_ID
+VARCHAR2                                                                                                                                  30                           N
+
+PF_TRANSACTION_FACT                                                                                                                       3
+TRANSACTION_LINE_NO
+NUMBER                                                                                                                                    22              4          0 N
+
+PF_TRANSACTION_FACT                                                                                                                       4
+DATE_KEY
+NUMBER                                                                                                                                    22              8          0 N
+
+PF_TRANSACTION_FACT                                                                                                                       5
+STORE_KEY
+NUMBER                                                                                                                                    22             10          0 N
+
+PF_TRANSACTION_FACT                                                                                                                       6
+CUSTOMER_KEY
+NUMBER                                                                                                                                    22             10          0 N
+
+PF_TRANSACTION_FACT                                                                                                                       7
+PRODUCT_KEY
+NUMBER                                                                                                                                    22             10          0 N
+
+PF_TRANSACTION_FACT                                                                                                                       8
+QUANTITY
+NUMBER                                                                                                                                    22             10          0 N
+
+PF_TRANSACTION_FACT                                                                                                                       9
+UNIT_SELLING_PRICE
+NUMBER                                                                                                                                    22             12          2 N
+
+PF_TRANSACTION_FACT                                                                                                                      10
+UNIT_COST
+NUMBER                                                                                                                                    22             12          2 N
+
+PF_TRANSACTION_FACT                                                                                                                      11
+SALES_AMOUNT
+NUMBER                                                                                                                                    22             14          2 N
+
+PF_TRANSACTION_FACT                                                                                                                      12
+COST_AMOUNT
+NUMBER                                                                                                                                    22             14          2 N
+
+
+50 rows selected.
+
+SQL>
+SQL> PROMPT ===== PK, UK, FK AND CHECK CONSTRAINT COLUMNS =====
+===== PK, UK, FK AND CHECK CONSTRAINT COLUMNS =====
+SQL> SELECT c.table_name,
+  2         c.constraint_name,
+  3         c.constraint_type,
+  4         cc.position,
+  5         cc.column_name,
+  6         c.status,
+  7         c.validated,
+  8         c.r_constraint_name
+  9  FROM user_constraints c
+ 10  LEFT JOIN user_cons_columns cc
+ 11      ON cc.owner = c.owner
+ 12     AND cc.constraint_name = c.constraint_name
+ 13     AND cc.table_name = c.table_name
+ 14  WHERE c.table_name IN (
+ 15      'PF_DATE_DIM',
+ 16      'PF_STORE_DIM',
+ 17      'PF_CUSTOMER_DIM',
+ 18      'PF_PRODUCT_DIM',
+ 19      'PF_TRANSACTION_FACT'
+ 20  )
+ 21    AND c.constraint_type IN ('P', 'U', 'R', 'C')
+ 22  ORDER BY c.table_name, c.constraint_type, c.constraint_name, cc.position;
+
+TABLE_NAME
+--------------------------------------------------------------------------------------------------------------------------------
+CONSTRAINT_NAME                                                                                                                  C   POSITION
+-------------------------------------------------------------------------------------------------------------------------------- - ----------
+COLUMN_NAME
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+STATUS   VALIDATED     R_CONSTRAINT_NAME
+-------- ------------- --------------------------------------------------------------------------------------------------------------------------------
+PF_CUSTOMER_DIM
+SYS_C0026785                                                                                                                     C
+CUSTOMER_KEY
+ENABLED  VALIDATED
+
+PF_CUSTOMER_DIM
+SYS_C0026786                                                                                                                     C
+CUSTOMER_ID
+ENABLED  VALIDATED
+
+PF_CUSTOMER_DIM
+SYS_C0026787                                                                                                                     C
+CUSTOMER_NAME
+ENABLED  VALIDATED
+
+PF_CUSTOMER_DIM
+PF_CUSTOMER_PK                                                                                                                   P          1
+CUSTOMER_KEY
+ENABLED  VALIDATED
+
+PF_CUSTOMER_DIM
+PF_CUSTOMER_ID_UK                                                                                                                U          1
+CUSTOMER_ID
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+PF_DATE_DAY_CK                                                                                                                   C
+DAY_OF_MONTH
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+PF_DATE_MONTH_CK                                                                                                                 C
+MONTH_NUMBER
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+PF_DATE_QTR_CK                                                                                                                   C
+QUARTER_NUMBER
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+PF_DATE_WEEK_CK                                                                                                                  C
+WEEK_OF_YEAR
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+PF_DATE_WEND_CK                                                                                                                  C
+WEEKEND_FLAG
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+SYS_C0026759                                                                                                                     C
+DATE_KEY
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+SYS_C0026760                                                                                                                     C
+FULL_DATE
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+SYS_C0026761                                                                                                                     C
+DAY_OF_MONTH
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+SYS_C0026762                                                                                                                     C
+DAY_NAME
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+SYS_C0026763                                                                                                                     C
+WEEK_OF_YEAR
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+SYS_C0026764                                                                                                                     C
+MONTH_NUMBER
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+SYS_C0026765                                                                                                                     C
+MONTH_NAME
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+SYS_C0026766                                                                                                                     C
+QUARTER_NUMBER
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+SYS_C0026767                                                                                                                     C
+CALENDAR_YEAR
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+SYS_C0026768                                                                                                                     C
+WEEKEND_FLAG
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+PF_DATE_PK                                                                                                                       P          1
+DATE_KEY
+ENABLED  VALIDATED
+
+PF_DATE_DIM
+PF_DATE_FULL_UK                                                                                                                  U          1
+FULL_DATE
+ENABLED  VALIDATED
+
+PF_PRODUCT_DIM
+PF_PRODUCT_TYPE_CK                                                                                                               C
+PRODUCT_TYPE
+ENABLED  VALIDATED
+
+PF_PRODUCT_DIM
+SYS_C0026790                                                                                                                     C
+PRODUCT_KEY
+ENABLED  VALIDATED
+
+PF_PRODUCT_DIM
+SYS_C0026791                                                                                                                     C
+PRODUCT_ID
+ENABLED  VALIDATED
+
+PF_PRODUCT_DIM
+SYS_C0026792                                                                                                                     C
+PRODUCT_NAME
+ENABLED  VALIDATED
+
+PF_PRODUCT_DIM
+SYS_C0026793                                                                                                                     C
+PRODUCT_TYPE
+ENABLED  VALIDATED
+
+PF_PRODUCT_DIM
+SYS_C0026794                                                                                                                     C
+CATEGORY_NAME
+ENABLED  VALIDATED
+
+PF_PRODUCT_DIM
+PF_PRODUCT_PK                                                                                                                    P          1
+PRODUCT_KEY
+ENABLED  VALIDATED
+
+PF_PRODUCT_DIM
+PF_PRODUCT_ID_UK                                                                                                                 U          1
+PRODUCT_ID
+ENABLED  VALIDATED
+
+PF_STORE_DIM
+PF_STORE_STATUS_CK                                                                                                               C
+STORE_STATUS
+ENABLED  VALIDATED
+
+PF_STORE_DIM
+SYS_C0026776                                                                                                                     C
+STORE_KEY
+ENABLED  VALIDATED
+
+PF_STORE_DIM
+SYS_C0026777                                                                                                                     C
+STORE_ID
+ENABLED  VALIDATED
+
+PF_STORE_DIM
+SYS_C0026778                                                                                                                     C
+STORE_NAME
+ENABLED  VALIDATED
+
+PF_STORE_DIM
+SYS_C0026779                                                                                                                     C
+OWNER_NAME
+ENABLED  VALIDATED
+
+PF_STORE_DIM
+SYS_C0026780                                                                                                                     C
+CITY
+ENABLED  VALIDATED
+
+PF_STORE_DIM
+SYS_C0026781                                                                                                                     C
+STORE_STATUS
+ENABLED  VALIDATED
+
+PF_STORE_DIM
+PF_STORE_PK                                                                                                                      P          1
+STORE_KEY
+ENABLED  VALIDATED
+
+PF_STORE_DIM
+PF_STORE_ID_UK                                                                                                                   U          1
+STORE_ID
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+PF_TXN_COST_CK                                                                                                                   C
+COST_AMOUNT
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+PF_TXN_LINE_CK                                                                                                                   C
+TRANSACTION_LINE_NO
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+PF_TXN_QTY_CK                                                                                                                    C
+QUANTITY
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+PF_TXN_SALES_CK                                                                                                                  C
+SALES_AMOUNT
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+PF_TXN_UCOST_CK                                                                                                                  C
+UNIT_COST
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+PF_TXN_UPRICE_CK                                                                                                                 C
+UNIT_SELLING_PRICE
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026798                                                                                                                     C
+TRANSACTION_KEY
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026799                                                                                                                     C
+SOURCE_TRANSACTION_ID
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026800                                                                                                                     C
+TRANSACTION_LINE_NO
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026801                                                                                                                     C
+DATE_KEY
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026802                                                                                                                     C
+STORE_KEY
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026803                                                                                                                     C
+CUSTOMER_KEY
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026804                                                                                                                     C
+PRODUCT_KEY
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026805                                                                                                                     C
+QUANTITY
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026806                                                                                                                     C
+UNIT_SELLING_PRICE
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026807                                                                                                                     C
+UNIT_COST
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026808                                                                                                                     C
+SALES_AMOUNT
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+SYS_C0026809                                                                                                                     C
+COST_AMOUNT
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+PF_TXN_PK                                                                                                                        P          1
+TRANSACTION_KEY
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+PF_TXN_CUST_FK                                                                                                                   R          1
+CUSTOMER_KEY
+ENABLED  VALIDATED     PF_CUSTOMER_PK
+
+PF_TRANSACTION_FACT
+PF_TXN_DATE_FK                                                                                                                   R          1
+DATE_KEY
+ENABLED  VALIDATED     PF_DATE_PK
+
+PF_TRANSACTION_FACT
+PF_TXN_PRODUCT_FK                                                                                                                R          1
+PRODUCT_KEY
+ENABLED  VALIDATED     PF_PRODUCT_PK
+
+PF_TRANSACTION_FACT
+PF_TXN_STORE_FK                                                                                                                  R          1
+STORE_KEY
+ENABLED  VALIDATED     PF_STORE_PK
+
+PF_TRANSACTION_FACT
+PF_TXN_SRC_LINE_UK                                                                                                               U          1
+STORE_KEY
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+PF_TXN_SRC_LINE_UK                                                                                                               U          2
+SOURCE_TRANSACTION_ID
+ENABLED  VALIDATED
+
+PF_TRANSACTION_FACT
+PF_TXN_SRC_LINE_UK                                                                                                               U          3
+TRANSACTION_LINE_NO
+ENABLED  VALIDATED
+
+
+65 rows selected.
+
+SQL>
+SQL> PROMPT ===== FOREIGN KEY TARGETS =====
+===== FOREIGN KEY TARGETS =====
+SQL> SELECT child.table_name AS child_table,
+  2         child.constraint_name AS foreign_key,
+  3         child_col.column_name AS child_column,
+  4         parent.table_name AS parent_table,
+  5         parent_col.column_name AS parent_column
+  6  FROM user_constraints child
+  7  JOIN user_cons_columns child_col
+  8      ON child_col.owner = child.owner
+  9     AND child_col.constraint_name = child.constraint_name
+ 10     AND child_col.table_name = child.table_name
+ 11  JOIN user_constraints parent
+ 12      ON parent.owner = child.r_owner
+ 13     AND parent.constraint_name = child.r_constraint_name
+ 14  JOIN user_cons_columns parent_col
+ 15      ON parent_col.owner = parent.owner
+ 16     AND parent_col.constraint_name = parent.constraint_name
+ 17     AND parent_col.position = child_col.position
+ 18  WHERE child.constraint_type = 'R'
+ 19    AND child.table_name = 'PF_TRANSACTION_FACT'
+ 20  ORDER BY child.constraint_name, child_col.position;
+
+CHILD_TABLE
+--------------------------------------------------------------------------------------------------------------------------------
+FOREIGN_KEY
+--------------------------------------------------------------------------------------------------------------------------------
+CHILD_COLUMN
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+PARENT_TABLE
+--------------------------------------------------------------------------------------------------------------------------------
+PARENT_COLUMN
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+PF_TRANSACTION_FACT
+PF_TXN_CUST_FK
+CUSTOMER_KEY
+PF_CUSTOMER_DIM
+CUSTOMER_KEY
+
+PF_TRANSACTION_FACT
+PF_TXN_DATE_FK
+DATE_KEY
+PF_DATE_DIM
+DATE_KEY
+
+PF_TRANSACTION_FACT
+PF_TXN_PRODUCT_FK
+PRODUCT_KEY
+PF_PRODUCT_DIM
+PRODUCT_KEY
+
+PF_TRANSACTION_FACT
+PF_TXN_STORE_FK
+STORE_KEY
+PF_STORE_DIM
+STORE_KEY
+
+
+4 rows selected.
+
+SQL>
+SQL> PROMPT ===== CHECK EXPRESSIONS =====
+===== CHECK EXPRESSIONS =====
+SQL> SELECT table_name, constraint_name, search_condition
+  2  FROM user_constraints
+  3  WHERE table_name IN (
+  4      'PF_DATE_DIM',
+  5      'PF_STORE_DIM',
+  6      'PF_CUSTOMER_DIM',
+  7      'PF_PRODUCT_DIM',
+  8      'PF_TRANSACTION_FACT'
+  9  )
+ 10    AND constraint_type = 'C'
+ 11  ORDER BY table_name, constraint_name;
+
+TABLE_NAME
+--------------------------------------------------------------------------------------------------------------------------------
+CONSTRAINT_NAME                                                                                                                  SEARCH_CONDITION
+-------------------------------------------------------------------------------------------------------------------------------- --------------------------------------------------------------------------------
+PF_CUSTOMER_DIM
+SYS_C0026785                                                                                                                     "CUSTOMER_KEY" IS NOT NULL
+
+PF_CUSTOMER_DIM
+SYS_C0026786                                                                                                                     "CUSTOMER_ID" IS NOT NULL
+
+PF_CUSTOMER_DIM
+SYS_C0026787                                                                                                                     "CUSTOMER_NAME" IS NOT NULL
+
+PF_DATE_DIM
+PF_DATE_DAY_CK                                                                                                                   DAY_OF_MONTH BETWEEN 1 AND 31
+
+PF_DATE_DIM
+PF_DATE_MONTH_CK                                                                                                                 MONTH_NUMBER BETWEEN 1 AND 12
+
+PF_DATE_DIM
+PF_DATE_QTR_CK                                                                                                                   QUARTER_NUMBER BETWEEN 1 AND 4
+
+PF_DATE_DIM
+PF_DATE_WEEK_CK                                                                                                                  WEEK_OF_YEAR BETWEEN 1 AND 53
+
+PF_DATE_DIM
+PF_DATE_WEND_CK                                                                                                                  WEEKEND_FLAG IN ('Y', 'N')
+
+PF_DATE_DIM
+SYS_C0026759                                                                                                                     "DATE_KEY" IS NOT NULL
+
+PF_DATE_DIM
+SYS_C0026760                                                                                                                     "FULL_DATE" IS NOT NULL
+
+PF_DATE_DIM
+SYS_C0026761                                                                                                                     "DAY_OF_MONTH" IS NOT NULL
+
+PF_DATE_DIM
+SYS_C0026762                                                                                                                     "DAY_NAME" IS NOT NULL
+
+PF_DATE_DIM
+SYS_C0026763                                                                                                                     "WEEK_OF_YEAR" IS NOT NULL
+
+PF_DATE_DIM
+SYS_C0026764                                                                                                                     "MONTH_NUMBER" IS NOT NULL
+
+PF_DATE_DIM
+SYS_C0026765                                                                                                                     "MONTH_NAME" IS NOT NULL
+
+PF_DATE_DIM
+SYS_C0026766                                                                                                                     "QUARTER_NUMBER" IS NOT NULL
+
+PF_DATE_DIM
+SYS_C0026767                                                                                                                     "CALENDAR_YEAR" IS NOT NULL
+
+PF_DATE_DIM
+SYS_C0026768                                                                                                                     "WEEKEND_FLAG" IS NOT NULL
+
+PF_PRODUCT_DIM
+PF_PRODUCT_TYPE_CK                                                                                                               PRODUCT_TYPE IN ('ACCESSORY', 'REPAIR_SERVICE')
+
+PF_PRODUCT_DIM
+SYS_C0026790                                                                                                                     "PRODUCT_KEY" IS NOT NULL
+
+PF_PRODUCT_DIM
+SYS_C0026791                                                                                                                     "PRODUCT_ID" IS NOT NULL
+
+PF_PRODUCT_DIM
+SYS_C0026792                                                                                                                     "PRODUCT_NAME" IS NOT NULL
+
+PF_PRODUCT_DIM
+SYS_C0026793                                                                                                                     "PRODUCT_TYPE" IS NOT NULL
+
+PF_PRODUCT_DIM
+SYS_C0026794                                                                                                                     "CATEGORY_NAME" IS NOT NULL
+
+PF_STORE_DIM
+PF_STORE_STATUS_CK                                                                                                               STORE_STATUS IN ('ACTIVE', 'INACTIVE')
+
+PF_STORE_DIM
+SYS_C0026776                                                                                                                     "STORE_KEY" IS NOT NULL
+
+PF_STORE_DIM
+SYS_C0026777                                                                                                                     "STORE_ID" IS NOT NULL
+
+PF_STORE_DIM
+SYS_C0026778                                                                                                                     "STORE_NAME" IS NOT NULL
+
+PF_STORE_DIM
+SYS_C0026779                                                                                                                     "OWNER_NAME" IS NOT NULL
+
+PF_STORE_DIM
+SYS_C0026780                                                                                                                     "CITY" IS NOT NULL
+
+PF_STORE_DIM
+SYS_C0026781                                                                                                                     "STORE_STATUS" IS NOT NULL
+
+PF_TRANSACTION_FACT
+PF_TXN_COST_CK                                                                                                                   COST_AMOUNT >= 0
+
+PF_TRANSACTION_FACT
+PF_TXN_LINE_CK                                                                                                                   TRANSACTION_LINE_NO > 0
+
+PF_TRANSACTION_FACT
+PF_TXN_QTY_CK                                                                                                                    QUANTITY > 0
+
+PF_TRANSACTION_FACT
+PF_TXN_SALES_CK                                                                                                                  SALES_AMOUNT >= 0
+
+PF_TRANSACTION_FACT
+PF_TXN_UCOST_CK                                                                                                                  UNIT_COST >= 0
+
+PF_TRANSACTION_FACT
+PF_TXN_UPRICE_CK                                                                                                                 UNIT_SELLING_PRICE >= 0
+
+PF_TRANSACTION_FACT
+SYS_C0026798                                                                                                                     "TRANSACTION_KEY" IS NOT NULL
+
+PF_TRANSACTION_FACT
+SYS_C0026799                                                                                                                     "SOURCE_TRANSACTION_ID" IS NOT NULL
+
+PF_TRANSACTION_FACT
+SYS_C0026800                                                                                                                     "TRANSACTION_LINE_NO" IS NOT NULL
+
+PF_TRANSACTION_FACT
+SYS_C0026801                                                                                                                     "DATE_KEY" IS NOT NULL
+
+PF_TRANSACTION_FACT
+SYS_C0026802                                                                                                                     "STORE_KEY" IS NOT NULL
+
+PF_TRANSACTION_FACT
+SYS_C0026803                                                                                                                     "CUSTOMER_KEY" IS NOT NULL
+
+PF_TRANSACTION_FACT
+SYS_C0026804                                                                                                                     "PRODUCT_KEY" IS NOT NULL
+
+PF_TRANSACTION_FACT
+SYS_C0026805                                                                                                                     "QUANTITY" IS NOT NULL
+
+PF_TRANSACTION_FACT
+SYS_C0026806                                                                                                                     "UNIT_SELLING_PRICE" IS NOT NULL
+
+PF_TRANSACTION_FACT
+SYS_C0026807                                                                                                                     "UNIT_COST" IS NOT NULL
+
+PF_TRANSACTION_FACT
+SYS_C0026808                                                                                                                     "SALES_AMOUNT" IS NOT NULL
+
+PF_TRANSACTION_FACT
+SYS_C0026809                                                                                                                     "COST_AMOUNT" IS NOT NULL
+
+
+49 rows selected.
+
+SQL>
+SQL> PROMPT ===== DESC OUTPUT FOR ALL TABLES =====
+===== DESC OUTPUT FOR ALL TABLES =====
+SQL> DESC PF_DATE_DIM
+Name           Null?    Type
+-------------- -------- -----------
+DATE_KEY       NOT NULL NUMBER(8)
+FULL_DATE      NOT NULL DATE
+DAY_OF_MONTH   NOT NULL NUMBER(2)
+DAY_NAME       NOT NULL VARCHAR2(9)
+WEEK_OF_YEAR   NOT NULL NUMBER(2)
+MONTH_NUMBER   NOT NULL NUMBER(2)
+MONTH_NAME     NOT NULL VARCHAR2(9)
+QUARTER_NUMBER NOT NULL NUMBER(1)
+CALENDAR_YEAR  NOT NULL NUMBER(4)
+WEEKEND_FLAG   NOT NULL CHAR(1)
+SQL> DESC PF_STORE_DIM
+Name         Null?    Type
+------------ -------- -------------
+STORE_KEY    NOT NULL NUMBER(10)
+STORE_ID     NOT NULL VARCHAR2(20)
+STORE_NAME   NOT NULL VARCHAR2(100)
+OWNER_NAME   NOT NULL VARCHAR2(100)
+ADDRESS_LINE          VARCHAR2(200)
+SUBURB                VARCHAR2(80)
+CITY         NOT NULL VARCHAR2(80)
+POSTCODE              VARCHAR2(10)
+OPEN_DATE             DATE
+STORE_STATUS NOT NULL VARCHAR2(10)
+SQL> DESC PF_CUSTOMER_DIM
+Name          Null?    Type
+------------- -------- -------------
+CUSTOMER_KEY  NOT NULL NUMBER(10)
+CUSTOMER_ID   NOT NULL VARCHAR2(30)
+CUSTOMER_NAME NOT NULL VARCHAR2(120)
+ADDRESS_LINE           VARCHAR2(200)
+SUBURB                 VARCHAR2(80)
+CITY                   VARCHAR2(80)
+DATE_OF_BIRTH          DATE
+INCOME_RANGE           VARCHAR2(40)
+OCCUPATION             VARCHAR2(100)
+SQL> DESC PF_PRODUCT_DIM
+Name          Null?    Type
+------------- -------- -------------
+PRODUCT_KEY   NOT NULL NUMBER(10)
+PRODUCT_ID    NOT NULL VARCHAR2(30)
+PRODUCT_NAME  NOT NULL VARCHAR2(120)
+PRODUCT_TYPE  NOT NULL VARCHAR2(20)
+CATEGORY_NAME NOT NULL VARCHAR2(80)
+BRAND_NAME             VARCHAR2(80)
+MODEL_NAME             VARCHAR2(80)
+SUPPLIER_ID            VARCHAR2(30)
+SUPPLIER_NAME          VARCHAR2(120)
+SQL> DESC PF_TRANSACTION_FACT
+Name                  Null?    Type
+--------------------- -------- ------------
+TRANSACTION_KEY       NOT NULL NUMBER(12)
+SOURCE_TRANSACTION_ID NOT NULL VARCHAR2(30)
+TRANSACTION_LINE_NO   NOT NULL NUMBER(4)
+DATE_KEY              NOT NULL NUMBER(8)
+STORE_KEY             NOT NULL NUMBER(10)
+CUSTOMER_KEY          NOT NULL NUMBER(10)
+PRODUCT_KEY           NOT NULL NUMBER(10)
+QUANTITY              NOT NULL NUMBER(10)
+UNIT_SELLING_PRICE    NOT NULL NUMBER(12,2)
+UNIT_COST             NOT NULL NUMBER(12,2)
+SALES_AMOUNT          NOT NULL NUMBER(14,2)
+COST_AMOUNT           NOT NULL NUMBER(14,2)
+SQL>
+SQL> PROMPT ===== VALIDATION COMPLETE =====
+===== VALIDATION COMPLETE =====
+SQL> SPOOL OFF

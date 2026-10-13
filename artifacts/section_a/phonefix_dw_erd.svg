@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1450" viewBox="0 0 2200 1450">
+  <defs>
+    <style>
+      .title { font: 700 34px Arial, sans-serif; fill: #17365d; }
+      .subtitle { font: 600 19px Arial, sans-serif; fill: #17365d; }
+      .table-title { font: 700 25px Arial, sans-serif; fill: #1f1f1f; }
+      .field { font: 19px Arial, sans-serif; fill: #202020; }
+      .field-key { font: 700 19px Arial, sans-serif; fill: #17365d; }
+      .note { font: 18px Arial, sans-serif; fill: #333333; }
+      .small { font: 16px Arial, sans-serif; fill: #444444; }
+      .card { stroke-width: 4; rx: 18; ry: 18; }
+      .divider { stroke-width: 2; }
+      .rel { fill: none; stroke-width: 4; }
+      .cardinality { font: 700 18px Arial, sans-serif; fill: #333333; }
+    </style>
+    <marker id="crow-blue" markerWidth="14" markerHeight="14" refX="13" refY="7" orient="auto" markerUnits="strokeWidth">
+      <path d="M 13 7 L 1 1 M 13 7 L 1 7 M 13 7 L 1 13" fill="none" stroke="#4472c4" stroke-width="1.5"/>
+    </marker>
+    <marker id="crow-green" markerWidth="14" markerHeight="14" refX="13" refY="7" orient="auto" markerUnits="strokeWidth">
+      <path d="M 13 7 L 1 1 M 13 7 L 1 7 M 13 7 L 1 13" fill="none" stroke="#70ad47" stroke-width="1.5"/>
+    </marker>
+    <marker id="crow-purple" markerWidth="14" markerHeight="14" refX="13" refY="7" orient="auto" markerUnits="strokeWidth">
+      <path d="M 13 7 L 1 1 M 13 7 L 1 7 M 13 7 L 1 13" fill="none" stroke="#8064a2" stroke-width="1.5"/>
+    </marker>
+    <marker id="crow-orange" markerWidth="14" markerHeight="14" refX="13" refY="7" orient="auto" markerUnits="strokeWidth">
+      <path d="M 13 7 L 1 1 M 13 7 L 1 7 M 13 7 L 1 13" fill="none" stroke="#ed7d31" stroke-width="1.5"/>
+    </marker>
+  </defs>
+
+  <rect width="2200" height="1450" fill="#ffffff"/>
+  <text x="1100" y="55" text-anchor="middle" class="title">PhoneFix Data Warehouse - Five-Table STAR Schema</text>
+  <rect x="490" y="82" width="1220" height="75" rx="16" fill="#eaf2f8" stroke="#5b9bd5" stroke-width="3"/>
+  <text x="1100" y="113" text-anchor="middle" class="subtitle">Fact grain: one accessory sale line or repair-service line, for one product/service,</text>
+  <text x="1100" y="139" text-anchor="middle" class="subtitle">one customer, one store and one date, within one source transaction.</text>
+
+  <!-- Relationships are behind the table cards. -->
+  <path d="M 560 420 L 650 420 L 650 455 L 700 455" class="rel" stroke="#4472c4" marker-end="url(#crow-blue)"/>
+  <text x="575" y="408" class="cardinality">1</text><text x="652" y="446" class="cardinality">0..*</text>
+  <path d="M 1640 420 L 1550 420 L 1550 515 L 1500 515" class="rel" stroke="#70ad47" marker-end="url(#crow-green)"/>
+  <text x="1615" y="408" class="cardinality">1</text><text x="1508" y="505" class="cardinality">0..*</text>
+  <path d="M 560 1040 L 650 1040 L 650 835 L 700 835" class="rel" stroke="#8064a2" marker-end="url(#crow-purple)"/>
+  <text x="575" y="1028" class="cardinality">1</text><text x="652" y="825" class="cardinality">0..*</text>
+  <path d="M 1640 1050 L 1550 1050 L 1550 895 L 1500 895" class="rel" stroke="#ed7d31" marker-end="url(#crow-orange)"/>
+  <text x="1615" y="1038" class="cardinality">1</text><text x="1508" y="885" class="cardinality">0..*</text>
+
+  <!-- Date dimension -->
+  <rect x="40" y="185" width="520" height="500" class="card" fill="#ddebf7" stroke="#4472c4"/>
+  <text x="300" y="225" text-anchor="middle" class="table-title">PF_DATE_DIM</text>
+  <line x1="40" y1="245" x2="560" y2="245" class="divider" stroke="#4472c4"/>
+  <text x="65" y="282" class="field-key">PK  DATE_KEY : NUMBER(8)</text>
+  <text x="65" y="320" class="field-key">UK  FULL_DATE : DATE</text>
+  <text x="65" y="358" class="field">DAY_OF_MONTH : NUMBER(2)</text>
+  <text x="65" y="396" class="field">DAY_NAME : VARCHAR2(9)</text>
+  <text x="65" y="434" class="field">WEEK_OF_YEAR : NUMBER(2)</text>
+  <text x="65" y="472" class="field">MONTH_NUMBER : NUMBER(2)</text>
+  <text x="65" y="510" class="field">MONTH_NAME : VARCHAR2(9)</text>
+  <text x="65" y="548" class="field">QUARTER_NUMBER : NUMBER(1)</text>
+  <text x="65" y="586" class="field">CALENDAR_YEAR : NUMBER(4)</text>
+  <text x="65" y="624" class="field">WEEKEND_FLAG : CHAR(1)</text>
+
+  <!-- Store dimension -->
+  <rect x="1640" y="185" width="520" height="500" class="card" fill="#e2f0d9" stroke="#70ad47"/>
+  <text x="1900" y="225" text-anchor="middle" class="table-title">PF_STORE_DIM</text>
+  <line x1="1640" y1="245" x2="2160" y2="245" class="divider" stroke="#70ad47"/>
+  <text x="1665" y="282" class="field-key">PK  STORE_KEY : NUMBER(10)</text>
+  <text x="1665" y="320" class="field-key">UK  STORE_ID : VARCHAR2(20)</text>
+  <text x="1665" y="358" class="field">STORE_NAME : VARCHAR2(100)</text>
+  <text x="1665" y="396" class="field">OWNER_NAME : VARCHAR2(100)</text>
+  <text x="1665" y="434" class="field">ADDRESS_LINE : VARCHAR2(200)</text>
+  <text x="1665" y="472" class="field">SUBURB : VARCHAR2(80)</text>
+  <text x="1665" y="510" class="field">CITY : VARCHAR2(80)</text>
+  <text x="1665" y="548" class="field">POSTCODE : VARCHAR2(10)</text>
+  <text x="1665" y="586" class="field">OPEN_DATE : DATE</text>
+  <text x="1665" y="624" class="field">STORE_STATUS : VARCHAR2(10)</text>
+
+  <!-- Customer dimension -->
+  <rect x="40" y="800" width="520" height="520" class="card" fill="#e4dfec" stroke="#8064a2"/>
+  <text x="300" y="840" text-anchor="middle" class="table-title">PF_CUSTOMER_DIM</text>
+  <line x1="40" y1="860" x2="560" y2="860" class="divider" stroke="#8064a2"/>
+  <text x="65" y="897" class="field-key">PK  CUSTOMER_KEY : NUMBER(10)</text>
+  <text x="65" y="935" class="field-key">UK  CUSTOMER_ID : VARCHAR2(30)</text>
+  <text x="65" y="973" class="field">CUSTOMER_NAME : VARCHAR2(120)</text>
+  <text x="65" y="1011" class="field">ADDRESS_LINE : VARCHAR2(200)</text>
+  <text x="65" y="1049" class="field">SUBURB : VARCHAR2(80)</text>
+  <text x="65" y="1087" class="field">CITY : VARCHAR2(80)</text>
+  <text x="65" y="1125" class="field">DATE_OF_BIRTH : DATE</text>
+  <text x="65" y="1163" class="field">INCOME_RANGE : VARCHAR2(40)</text>
+  <text x="65" y="1201" class="field">OCCUPATION : VARCHAR2(100)</text>
+
+  <!-- Product dimension -->
+  <rect x="1640" y="780" width="520" height="560" class="card" fill="#fce4d6" stroke="#ed7d31"/>
+  <text x="1900" y="820" text-anchor="middle" class="table-title">PF_PRODUCT_DIM</text>
+  <line x1="1640" y1="840" x2="2160" y2="840" class="divider" stroke="#ed7d31"/>
+  <text x="1665" y="877" class="field-key">PK  PRODUCT_KEY : NUMBER(10)</text>
+  <text x="1665" y="915" class="field-key">UK  PRODUCT_ID : VARCHAR2(30)</text>
+  <text x="1665" y="953" class="field">PRODUCT_NAME : VARCHAR2(120)</text>
+  <text x="1665" y="991" class="field">PRODUCT_TYPE : VARCHAR2(20)</text>
+  <text x="1665" y="1029" class="field">CATEGORY_NAME : VARCHAR2(80)</text>
+  <text x="1665" y="1067" class="field">BRAND_NAME : VARCHAR2(80)</text>
+  <text x="1665" y="1105" class="field">MODEL_NAME : VARCHAR2(80)</text>
+  <text x="1665" y="1143" class="field">SUPPLIER_ID : VARCHAR2(30)</text>
+  <text x="1665" y="1181" class="field">SUPPLIER_NAME : VARCHAR2(120)</text>
+  <rect x="1665" y="1220" width="470" height="80" rx="12" fill="#fff5ef" stroke="#ed7d31" stroke-width="2"/>
+  <text x="1900" y="1251" text-anchor="middle" class="note">PRODUCT_TYPE values:</text>
+  <text x="1900" y="1280" text-anchor="middle" class="note">ACCESSORY | REPAIR_SERVICE</text>
+
+  <!-- Transaction fact -->
+  <rect x="700" y="185" width="800" height="1135" class="card" fill="#fff2cc" stroke="#bf9000"/>
+  <text x="1100" y="230" text-anchor="middle" class="table-title">PF_TRANSACTION_FACT</text>
+  <line x1="700" y1="255" x2="1500" y2="255" class="divider" stroke="#bf9000"/>
+  <text x="730" y="300" class="field-key">PK  TRANSACTION_KEY : NUMBER(12)</text>
+  <text x="730" y="350" class="field-key">DD / UK  SOURCE_TRANSACTION_ID : VARCHAR2(30)</text>
+  <text x="730" y="400" class="field-key">UK  TRANSACTION_LINE_NO : NUMBER(4)</text>
+  <text x="730" y="450" class="field-key">FK  DATE_KEY : NUMBER(8)</text>
+  <text x="730" y="500" class="field-key">FK / UK  STORE_KEY : NUMBER(10)</text>
+  <text x="730" y="550" class="field-key">FK  CUSTOMER_KEY : NUMBER(10)</text>
+  <text x="730" y="600" class="field-key">FK  PRODUCT_KEY : NUMBER(10)</text>
+  <line x1="725" y1="630" x2="1475" y2="630" class="divider" stroke="#d6b656"/>
+  <text x="730" y="680" class="field"><tspan font-weight="700">MEASURE</tspan>  QUANTITY : NUMBER(10)</text>
+  <text x="730" y="730" class="field"><tspan font-weight="700">MEASURE</tspan>  UNIT_SELLING_PRICE : NUMBER(12,2)</text>
+  <text x="730" y="780" class="field"><tspan font-weight="700">MEASURE</tspan>  UNIT_COST : NUMBER(12,2)</text>
+  <text x="730" y="830" class="field"><tspan font-weight="700">MEASURE</tspan>  SALES_AMOUNT : NUMBER(14,2)</text>
+  <text x="730" y="880" class="field"><tspan font-weight="700">MEASURE</tspan>  COST_AMOUNT : NUMBER(14,2)</text>
+  <rect x="730" y="930" width="740" height="125" rx="14" fill="#fff9e6" stroke="#bf9000" stroke-width="2"/>
+  <text x="760" y="970" class="note" font-weight="700">Alternate key</text>
+  <text x="760" y="1005" class="note">(STORE_KEY, SOURCE_TRANSACTION_ID,</text>
+  <text x="760" y="1037" class="note"> TRANSACTION_LINE_NO)</text>
+  <rect x="730" y="1080" width="740" height="155" rx="14" fill="#fff9e6" stroke="#bf9000" stroke-width="2"/>
+  <text x="760" y="1120" class="note" font-weight="700">Measure behaviour</text>
+  <text x="760" y="1155" class="note">QUANTITY, SALES_AMOUNT and COST_AMOUNT are additive.</text>
+  <text x="760" y="1190" class="note">Gross profit = SUM(SALES_AMOUNT) - SUM(COST_AMOUNT).</text>
+
+  <text x="1100" y="1400" text-anchor="middle" class="small">PK = primary key | FK = foreign key | UK = unique/alternate key | DD = degenerate dimension | MEASURE = numeric fact</text>
+</svg>
